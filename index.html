@@ -116,13 +116,6 @@ const MGR_HASH='ad8e75c1103994c2c3b8e4a33d958ea1c84ea8fc03a70c118e5844ffd53147a0
 /* PRODUCTS: [id, código, nome, [qtd por loja]] — vem da planilha */
 let PRODUCTS=[];
 const short=n=>n.replace('AR COND SPLIT ','').replace(' FRIO 220V','');
-/* histórico de vendas dos 5 meses anteriores — DADOS DE EXEMPLO até entrarem os reais */
-const HT={'02':[8,10,9,12,11],'41':[11,13,15,14,16],'51':[6,7,6,9,8],'85':[10,12,14,13,15],'87':[5,6,7,6,8]};
-const PWB=[1,3,2,1,2,2,2,1,3,1];
-function split(total){const PW=PRODUCTS.map((_,i)=>PWB[i%PWB.length]);const sw=PW.reduce((a,b)=>a+b,0)||1,raw=PW.map(w=>total*w/sw),f=raw.map(Math.floor);let rem=total-f.reduce((a,b)=>a+b,0);
-  raw.map((r,i)=>[r-f[i],i]).sort((a,b)=>b[0]-a[0]).slice(0,rem).forEach(([,i])=>f[i]++);return f}
-let HIST={};
-function buildHist(){HIST={};STORES.forEach(([s])=>HIST[s]=HT[s].map(split))}
 const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=s=>document.querySelector(s);
@@ -130,7 +123,7 @@ const pad=n=>String(n).padStart(2,'0');
 const fmt=t=>{const d=new Date(t);return `${pad(d.getDate())} ${MES[d.getMonth()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`};
 
 const TABS=[['todas','📦','Todas as lojas'],['loja','🏬','Minha loja'],['vendas','📈','Vendas']];
-const S={tab:'todas',store:null,pw:null,view:null,q:'',fa:'all',fs:'all',vs:'all',mgr:false,loading:true,error:null,busy:false,log:[],apiV:1,seller:''};
+const S={tab:'todas',store:null,pw:null,view:null,q:'',fa:'all',fs:'all',vs:'all',mgr:false,loading:true,error:null,busy:false,log:[],apiV:1,seller:'',sales:{},mgrPw:null};
 /* sessão da loja fica salva no aparelho até tocar em Sair */
 const SESS='ar-sessao';
 function saveSess(){try{if(S.store)localStorage.setItem(SESS,JSON.stringify({store:S.store,pw:S.pw,seller:S.seller||''}));else localStorage.removeItem(SESS)}catch(e){}}
@@ -149,7 +142,7 @@ const idOf=code=>String(code).replace(/\D/g,'');
 function load(data){
   PRODUCTS=data.products.map(p=>[idOf(p.code),p.code,p.name,STORES.map(([s])=>Number(p.qty[s])||0)]);
   S.log=(data.log||[]).map(e=>({...e,code:idOf(e.code)}));
-  S.apiV=Number(data.v)||1;buildHist();S.loading=false;S.error=null;
+  S.apiV=Number(data.v)||1;S.sales={};(data.sales||[]).forEach(([k,st,c,q])=>{const key=k+'|'+st+'|'+idOf(c);S.sales[key]=(S.sales[key]||0)+(Number(q)||0)});S.loading=false;S.error=null;
 }
 async function refresh(){
   if(S.busy)return;
@@ -228,16 +221,13 @@ function salesData(filter){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth(),d=now.getDate();
   const dim=(yy,mm)=>new Date(yy,mm+1,0).getDate();
   const stores=filter==='all'?STORES.map(s=>s[0]):[filter];
-  const months=[];
-  for(let i=0;i<5;i++){const dt=new Date(y,m-5+i,1);
-    const byP=PRODUCTS.map((_,pi)=>stores.reduce((a,s)=>a+HIST[s][i][pi],0));
-    months.push({label:MES[dt.getMonth()],y:dt.getFullYear(),dim:dim(dt.getFullYear(),dt.getMonth()),byP,total:byP.reduce((a,b)=>a+b,0)});}
-  const start=new Date(y,m,1).getTime();
-  const real=S.log.filter(e=>isSale(e)&&e.ts>=start&&stores.includes(e.store));
-  const curP=PRODUCTS.map(p=>real.filter(e=>e.code===p[0]).reduce((a,e)=>a+e.qty,0));
-  const cur=curP.reduce((a,b)=>a+b,0);
-  const curStore=Object.fromEntries(STORES.map(([s])=>[s,real.filter(e=>e.store===s).reduce((a,e)=>a+e.qty,0)]));
-  return {now,d,dim:dim(y,m),months,cur,curP,curStore,stores};
+  const sold=(k,st,p)=>S.sales[k+'|'+st+'|'+p[0]]||0;
+  const month=off=>{const dt=new Date(y,m+off,1),k=dt.getFullYear()+'-'+pad(dt.getMonth()+1);
+    const byP=PRODUCTS.map(p=>stores.reduce((a,st)=>a+sold(k,st,p),0));
+    const byStore=Object.fromEntries(STORES.map(([st])=>[st,PRODUCTS.reduce((a,p)=>a+sold(k,st,p),0)]));
+    return {label:MES[dt.getMonth()],y:dt.getFullYear(),dim:dim(dt.getFullYear(),dt.getMonth()),byP,byStore,total:byP.reduce((a,b)=>a+b,0)}};
+  const months=[-5,-4,-3,-2,-1].map(month),c=month(0);
+  return {now,d,dim:dim(y,m),months,cur:c.total,curP:c.byP,curStore:c.byStore,stores,hasHist:months.some(x=>x.total>0)};
 }
 function chartVendas(D){
   const bars=[...D.months.map(x=>({l:x.label,v:x.total,cur:false})),{l:MES[D.now.getMonth()],v:D.cur,cur:true,proj:Math.round(D.cur/D.d*D.dim)}];
@@ -258,16 +248,20 @@ function vLock(){
 }
 function vVendas(){
   if(!S.mgr)return vLock();
-  return `<div class="row sp"><span class="sub">🔓 Área da gerência</span><button class="btn sm" data-a="lock">🔒 Bloquear</button></div>`+vVendasInner();
+  return `<div class="row sp"><span class="sub">🔓 Área da gerência</span><button class="btn sm" data-a="lock">🔒 Bloquear</button></div>`+vVendasInner()+
+  `<div class="card"><div class="row sp"><h2>Modelos cadastrados · ${PRODUCTS.length}</h2>${S.apiV>=3?`<button class="btn pri sm" data-a="newprod">＋ Novo modelo</button>`:''}</div>
+   <p class="sub" style="margin-top:4px">Modelo novo entra com estoque zero em todas as lojas. O estoque é lançado depois, pela entrada de cada loja.</p>
+   ${PRODUCTS.map(p=>`<div class="lg"><div><span class="code">${esc(p[1])}</span><br>${esc(p[2])}</div></div>`).join('')}</div>`;
 }
 function vVendasInner(){
   const D=salesData(S.vs),prev=D.months[4],ml=MES[D.now.getMonth()];
   const prevSame=prev.total*D.d/prev.dim,vp=pct(D.cur,prevSame);
   const avg=Math.round(D.months.slice(2).reduce((a,x)=>a+x.total,0)/3);
-  const rows=STORES.map(([s,n])=>{const t=HIST[s][4].reduce((a,b)=>a+b,0),ps=t*D.d/prev.dim;return {s,n,cur:D.curStore[s],prev:t,v:pct(D.curStore[s],ps)}});
-  const top=PRODUCTS.map((p,i)=>({p,cur:D.curP[i],prev:prev.byP[i],avg:Math.round(D.months.slice(2).reduce((a,x)=>a+x.byP[i],0)/3*10)/10})).sort((a,b)=>b.avg-a.avg).slice(0,6);
+  const rows=STORES.map(([s,n])=>{const t=prev.byStore[s],ps=t*D.d/prev.dim;return {s,n,cur:D.curStore[s],prev:t,v:pct(D.curStore[s],ps)}});
+  const top=PRODUCTS.map((p,i)=>({p,cur:D.curP[i],prev:prev.byP[i],avg:Math.round(D.months.slice(2).reduce((a,x)=>a+x.byP[i],0)/3*10)/10})).sort((a,b)=>b.avg-a.avg||b.cur-a.cur).slice(0,6);
   return `<div class="chips">${[['all','Todas as lojas'],...STORES.map(([s,n])=>[s,`${s} · ${n}`])].map(([k,l])=>`<button class="chip" aria-pressed="${S.vs===k}" data-a="vs" data-v="${k}">${l}</button>`).join('')}</div>
-  <div class="note">Mês atual = baixas por venda registradas neste app (transferência e avaria não contam). Os 5 meses anteriores são <b>dados de exemplo</b> até você enviar as vendas reais.</div>
+  ${S.apiV<3?`<div class="banner">Atualize o Apps Script da planilha para a versão nova: sem isso as vendas não aparecem aqui.</div>`
+  :`<div class="note">Vendas = baixas por venda registradas neste app (transferência e avaria não contam).${D.hasHist?'':' Ainda não há meses anteriores: para comparar, preencha a aba <b>Histórico</b> da planilha com as vendas antigas.'}</div>`}
   <div class="hs"><div class="kp"><b>${D.cur}</b><span>vendidas em ${ml} (até dia ${D.d})</span></div>
   <div class="kp"><b>${Math.round(prevSame*10)/10}</b><span>mesmo período de ${prev.label}</span></div>
   <div class="kp"><b style="font-size:20px;line-height:1.5">${vtxt(vp)}</b><span>variação vs. ${prev.label}</span></div>
@@ -323,16 +317,16 @@ function moveModal(id,type){
   modal(`<h3>${type==='Baixa'?'Dar baixa':'Registrar entrada'} · Loja ${S.store}</h3><p class="sub"><span class="code">${esc(p[1])}</span> ${esc(p[2])}<br>Saldo atual: <b>${cur}</b></p>
   <label>Quantidade</label><div class="step"><button class="btn" id="mi" type="button" aria-label="Menos">−</button><input id="mq" type="number" min="1" max="${max}" value="1" inputmode="numeric"><button class="btn" id="pl" type="button" aria-label="Mais">＋</button></div><div class="errm" id="me"></div>
   ${type==='Baixa'&&S.apiV>=2?`<label for="mr">Motivo da baixa</label><select id="mr"><option value="Venda">Venda</option><option value="Transferência">Transferência para outra loja</option><option value="Avaria">Avaria ou outro motivo</option></select><div id="mdw" hidden><label for="md">Loja de destino</label><select id="md">${STORES.filter(([s])=>s!==S.store).map(([s,n])=>`<option value="${s}">${s} · ${n}</option>`).join('')}</select><p class="sub" style="margin-top:6px">Sai desta loja e entra na loja de destino. Não conta como venda.</p></div>`:''}
-  ${type==='Baixa'?`<label for="mv">Nome do vendedor</label><input id="mv" placeholder="Opcional" autocomplete="off" value="${esc(S.seller||'')}"><label for="mp">Nome ou nº do pedido</label><input id="mp" placeholder="Opcional" autocomplete="off">`:''}
+  ${type==='Baixa'?`<label for="mv">Nome do vendedor</label><input id="mv" placeholder="Obrigatório" autocomplete="off" value="${esc(S.seller||'')}"><label for="mp">Nome ou nº do pedido</label><input id="mp" placeholder="Obrigatório na venda" autocomplete="off">`:''}
   <label for="mn">Observação (cliente, NF, motivo)</label><input id="mn" placeholder="Opcional">
   ${type==='Entrada'?`<label for="ep">🔒 Senha de entrada</label><input id="ep" type="password" autocomplete="off" autocapitalize="characters" placeholder="Senha para dar entrada"><div class="errm" id="epe"></div>`:''}
   <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn ${type==='Baixa'?'red':'pri'}" id="ok">Confirmar ${type==='Baixa'?'baixa':'entrada'}</button></div>`);
   const q=$('#mq'),ok=$('#ok'),mr=$('#mr');
   const okTxt=()=>type==='Entrada'?'Confirmar entrada':mr&&mr.value==='Transferência'?'Confirmar transferência':'Confirmar baixa';
-  if(mr)mr.addEventListener('change',()=>{$('#mdw').hidden=mr.value!=='Transferência';ok.textContent=okTxt()});
-  const ep=$('#ep');const val=()=>{const n=parseInt(q.value);let m='';if(!(n>0))m='Informe uma quantidade maior que zero';else if(type==='Baixa'&&n>cur)m=`Só há ${cur} unidade(s) em estoque`;$('#me').textContent=m;ok.disabled=!!m||(ep&&!ep.value.trim());return !m};
+  if(mr)mr.addEventListener('change',()=>{$('#mdw').hidden=mr.value!=='Transferência';$('#mp').placeholder=mr.value==='Venda'?'Obrigatório na venda':'Opcional';ok.textContent=okTxt();if(ok.disabled)val()});
+  const ep=$('#ep');const val=()=>{const n=parseInt(q.value);let m='';if(!(n>0))m='Informe uma quantidade maior que zero';else if(type==='Baixa'&&n>cur)m=`Só há ${cur} unidade(s) em estoque`;else if(type==='Baixa'&&!$('#mv').value.trim())m='Informe o nome do vendedor';else if(type==='Baixa'&&(!mr||mr.value==='Venda')&&!$('#mp').value.trim())m='Informe o nome ou nº do pedido';$('#me').textContent=m;ok.disabled=!!m||(ep&&!ep.value.trim());return !m};
   if(ep){ok.disabled=true;ep.addEventListener('input',()=>{ep.classList.remove('err');$('#epe').textContent='';val()})}
-  q.addEventListener('input',val);$('#mi').onclick=()=>{q.value=Math.max(1,(parseInt(q.value)||1)-1);val()};$('#pl').onclick=()=>{q.value=Math.min(max,(parseInt(q.value)||0)+1);val()};
+  q.addEventListener('input',val);['#mv','#mp'].forEach(k=>{const f=$(k);if(f)f.addEventListener('input',()=>{if(ok.disabled)val()})});$('#mi').onclick=()=>{q.value=Math.max(1,(parseInt(q.value)||1)-1);val()};$('#pl').onclick=()=>{q.value=Math.min(max,(parseInt(q.value)||0)+1);val()};
   ok.onclick=async()=>{if(!val())return;ok.disabled=true;
     if(ep){ok.textContent='Verificando…';if(!(await checkEntryPw(ep.value))){ep.classList.add('err');$('#epe').textContent='Senha de entrada incorreta';ok.disabled=false;ok.textContent='Confirmar entrada';ep.select();return}}
     ok.textContent='Salvando…';const n=parseInt(q.value);const sel=type==='Baixa'?$('#mv').value.trim():'';if(type==='Baixa'){S.seller=sel;saveSess()}
@@ -341,19 +335,42 @@ function moveModal(id,type){
     if(r.ok){close();toast(dest?`✓ ${n} un transferida(s) para a loja ${dest}`:`✓ ${type} de ${n} un registrada`)}
     else{$('#me').textContent=r.error;ok.disabled=false;ok.textContent=okTxt()}};
 }
+function confirmRevert(en){
+  const p=PRODUCTS.find(x=>x[0]===en.code);
+  modal(`<h3>Estornar este lançamento?</h3><p class="sub"><b>${en.type==='Baixa'?'−':'+'}${en.qty}</b> ${p?esc(short(p[2])):esc(en.code)}<br>${en.ts?fmt(en.ts):esc(en.data||'')}${en.reason?' · '+esc(en.reason):''}${en.seller?' · Vend.: '+esc(en.seller):''}${en.order?' · Pedido: '+esc(en.order):''}</p>
+  <p class="sub" style="margin-top:8px">${isTransf(en)?'As unidades voltam da loja de destino para esta loja.':'O saldo da loja volta ao que era antes do lançamento.'}</p>
+  <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn red" id="crok">Estornar</button></div>`);
+  const b=$('#crok');b.onclick=async()=>{b.disabled=true;b.textContent='Estornando…';await revert(en.id);close()};
+}
+function productModal(){
+  modal(`<h3>Novo modelo</h3><p class="sub">Entra com estoque zero em todas as lojas.</p>
+  <label for="np">Código</label><input id="np" placeholder="Ex.: 54.334" autocomplete="off" inputmode="decimal">
+  <label for="nn">Nome do produto</label><input id="nn" placeholder="AR COND SPLIT ..." autocomplete="off" autocapitalize="characters">
+  <label for="nt">Tipo</label><input id="nt" placeholder="Opcional (ex.: INVERTER)" autocomplete="off" autocapitalize="characters"><div class="errm" id="ne"></div>
+  <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn pri" id="nok">Cadastrar</button></div>`);
+  const b=$('#nok');$('#np').focus();
+  b.onclick=async()=>{const code=$('#np').value.trim(),name=$('#nn').value.trim();
+    if(!/\d/.test(code)){$('#ne').textContent='Informe o código do produto';return}
+    if(!name){$('#ne').textContent='Informe o nome do produto';return}
+    if(PRODUCTS.some(p=>p[0]===idOf(code))){$('#ne').textContent='Já existe um produto com esse código';return}
+    b.disabled=true;b.textContent='Salvando…';
+    const r=await post({action:'addProduct',mgrPw:S.mgrPw,code,name,ptype:$('#nt').value.trim()});
+    if(r.ok){close();toast('✓ Modelo cadastrado')}else{$('#ne').textContent=r.error;b.disabled=false;b.textContent='Cadastrar'}};
+}
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a;
   if(a==='tab'){if(t.dataset.v==='loja'&&!S.view)S.view=S.store;go(t.dataset.v)}
   else if(a==='login')loginModal(t.dataset.s);
-  else if(a==='logout'){S.store=null;S.pw=null;S.mgr=false;saveSess();render();toast('Sessão encerrada')}
+  else if(a==='logout'){S.store=null;S.pw=null;S.mgr=false;S.mgrPw=null;saveSess();render();toast('Sessão encerrada')}
   else if(a==='close')close();
   else if(a==='retry'){S.loading=true;render();refresh()}
   else if(a==='baixa')moveModal(t.dataset.id,'Baixa');else if(a==='entrada')moveModal(t.dataset.id,'Entrada');
-  else if(a==='revert'){const en=S.log.find(x=>x.id===t.dataset.id);if(en&&en.type==='Entrada')pwModal('Estornar entrada',v=>revert(en.id,v));else revert(t.dataset.id)}
+  else if(a==='revert'){const en=S.log.find(x=>x.id===t.dataset.id);if(!en)return;if(en.type==='Entrada')pwModal('Estornar entrada',v=>revert(en.id,v));else confirmRevert(en)}
+  else if(a==='newprod')productModal();
   else if(a==='gostore'){S.view=t.dataset.s;S.q='';S.fs='all';go('loja')}
   else if(a==='view'){S.view=t.dataset.s;render()}
   else if(a==='unlock')tryUnlock();
-  else if(a==='lock'){S.mgr=false;render();toast('Vendas bloqueadas')}
+  else if(a==='lock'){S.mgr=false;S.mgrPw=null;render();toast('Vendas bloqueadas')}
   else if(a==='fa'){S.fa=t.dataset.v;render()}
   else if(a==='fs'){S.fs=t.dataset.v;render()}
   else if(a==='vs'){S.vs=t.dataset.v;render()}
@@ -362,7 +379,7 @@ async function tryUnlock(){
   const i=$('#gp'),b=$('#gpb');if(!i||!i.value.trim()){if(i){$('#gpe').textContent='Digite a senha';i.classList.add('err')}return}
   b.disabled=true;b.textContent='Verificando…';let ok=false;
   try{ok=(await sha(i.value.replace(/\s+/g,'').toUpperCase()))===MGR_HASH}catch(e){}
-  if(ok){S.mgr=true;render();toast('✓ Acesso liberado')}
+  if(ok){S.mgr=true;S.mgrPw=i.value;render();toast('✓ Acesso liberado')}
   else{i.classList.add('err');$('#gpe').textContent='Senha incorreta';b.disabled=false;b.textContent='Acessar vendas';i.select()}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='gp')tryUnlock()});
