@@ -7,15 +7,20 @@
  *
  * O site (GitHub Pages) lê e grava por aqui:
  *   GET  ?action=data                → estoque + lançamentos
- *   POST {action:'move', ...}         → baixa ou entrada
+ *   POST {action:'move', ...}         → baixa (venda, transferência ou avaria) ou entrada
  *   POST {action:'revert', ...}       → estorno de um lançamento
  * As senhas são conferidas aqui no servidor, não só na tela.
+ *
+ * Aba Lançamentos: a coluna K guarda o motivo (Venda, Avaria, Transferência → loja).
+ * Uma transferência grava duas linhas: a baixa na origem e a entrada no destino (id com final -T).
  */
 
 var ABA_ESTOQUE = 'Estoque';
 var ABA_LANC = 'Lançamentos';
 var LOJAS = ['02', '41', '51', '85', '87'];
 var SAL = 'ar-romanos:';
+var VERSAO = 2;
+var COL_MOTIVO = 11; // coluna K da aba Lançamentos
 
 // Mesmas senhas do layout (guardadas só como hash SHA-256)
 var HASH_LOJA = {
@@ -74,10 +79,11 @@ function lerTudo_() {
     if (!l[0]) continue;
     log.push({
       id: l[0], ts: Number(String(l[0]).split('-')[0]) || 0, data: l[1], store: l[2], code: l[3],
-      type: l[4], qty: toInt_(l[5]), seller: l[6], order: l[7], note: l[8], reverted: !!l[9]
+      type: l[4], qty: toInt_(l[5]), seller: l[6], order: l[7], note: l[8], reverted: !!l[9],
+      reason: l[10] || ''
     });
   }
-  return { products: products, log: log, updated: Date.now() };
+  return { products: products, log: log, updated: Date.now(), v: VERSAO };
 }
 
 function colunasLojas_(cab) {
@@ -102,18 +108,39 @@ function movimentar_(req) {
   if (!confere_(req.pw, HASH_LOJA[loja])) throw new Error('Senha da loja incorreta');
   if (tipo === 'Entrada' && !confere_(req.entryPw, HASH_ENTRADA)) throw new Error('Senha de entrada incorreta');
 
+  var motivo = '';
+  var destino = '';
+  if (tipo === 'Baixa') {
+    motivo = ['Venda', 'Transferência', 'Avaria'].indexOf(req.reason) >= 0 ? req.reason : 'Venda';
+    if (motivo === 'Transferência') {
+      destino = String(req.dest || '');
+      if (LOJAS.indexOf(destino) < 0 || destino === loja) throw new Error('Escolha a loja de destino');
+    }
+  }
+
   var celula = celulaEstoque_(String(req.code), loja);
   var atual = toInt_(celula.getValue());
   var novo = tipo === 'Baixa' ? atual - n : atual + n;
   if (novo < 0) throw new Error('Só há ' + atual + ' unidade(s) em estoque');
+  var celDest = destino ? celulaEstoque_(String(req.code), destino) : null;
   celula.setValue(novo);
+  if (celDest) celDest.setValue(toInt_(celDest.getValue()) + n);
 
   var agora = new Date();
+  var data = Utilities.formatDate(agora, 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss');
   var id = agora.getTime() + '-' + loja + '-' + Math.floor(Math.random() * 1e4);
-  SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_LANC).appendRow([
-    id, Utilities.formatDate(agora, 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss'), loja, String(req.code),
-    tipo, n, limpa_(req.seller), limpa_(req.order), limpa_(req.note), ''
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_LANC);
+  if (!sh.getRange(1, COL_MOTIVO).getValue()) sh.getRange(1, COL_MOTIVO).setValue('Motivo');
+  sh.appendRow([
+    id, data, loja, String(req.code), tipo, n, limpa_(req.seller), limpa_(req.order), limpa_(req.note), '',
+    destino ? 'Transferência → ' + destino : motivo
   ]);
+  if (destino) {
+    sh.appendRow([
+      id + '-T', data, destino, String(req.code), 'Entrada', n, limpa_(req.seller), limpa_(req.order), limpa_(req.note), '',
+      'Transferência ← ' + loja
+    ]);
+  }
 }
 
 function estornar_(req) {
@@ -122,15 +149,29 @@ function estornar_(req) {
   for (var i = 1; i < dados.length; i++) {
     if (dados[i][0] !== String(req.id)) continue;
     var r = dados[i], loja = r[2], tipo = r[4], n = toInt_(r[5]);
+    var transf = String(r[10] || '').indexOf('Transferência') === 0;
+    var agora = Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss');
     if (r[9]) throw new Error('Esse lançamento já foi estornado');
+    if (transf && tipo === 'Entrada') throw new Error('Transferência: o estorno é feito pela loja de origem');
     if (!confere_(req.pw, HASH_LOJA[loja])) throw new Error('Senha da loja incorreta');
     if (tipo === 'Entrada' && !confere_(req.entryPw, HASH_ENTRADA)) throw new Error('Senha de entrada incorreta');
     var celula = celulaEstoque_(r[3], loja);
     var atual = toInt_(celula.getValue());
     var novo = tipo === 'Baixa' ? atual + n : atual - n;
     if (novo < 0) throw new Error('Não dá para estornar: o saldo ficaria negativo');
+    if (transf) {
+      // devolve da loja de destino para a de origem, nas duas linhas
+      var par = -1;
+      for (var k = 1; k < dados.length; k++) if (dados[k][0] === String(req.id) + '-T') { par = k; break; }
+      if (par < 0) throw new Error('Entrada da transferência não encontrada');
+      var celDest = celulaEstoque_(r[3], dados[par][2]);
+      var saldoDest = toInt_(celDest.getValue());
+      if (saldoDest < n) throw new Error('Não dá para estornar: a loja ' + dados[par][2] + ' só tem ' + saldoDest + ' unidade(s)');
+      celDest.setValue(saldoDest - n);
+      sh.getRange(par + 1, 10).setValue(agora);
+    }
     celula.setValue(novo);
-    sh.getRange(i + 1, 10).setValue(Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss'));
+    sh.getRange(i + 1, 10).setValue(agora);
     return;
   }
   throw new Error('Lançamento não encontrado');

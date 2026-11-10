@@ -130,7 +130,16 @@ const pad=n=>String(n).padStart(2,'0');
 const fmt=t=>{const d=new Date(t);return `${pad(d.getDate())} ${MES[d.getMonth()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`};
 
 const TABS=[['todas','📦','Todas as lojas'],['loja','🏬','Minha loja'],['vendas','📈','Vendas']];
-const S={tab:'todas',store:null,pw:null,view:null,q:'',fa:'all',fs:'all',vs:'all',mgr:false,loading:true,error:null,busy:false,log:[]};
+const S={tab:'todas',store:null,pw:null,view:null,q:'',fa:'all',fs:'all',vs:'all',mgr:false,loading:true,error:null,busy:false,log:[],apiV:1,seller:''};
+/* sessão da loja fica salva no aparelho até tocar em Sair */
+const SESS='ar-sessao';
+function saveSess(){try{if(S.store)localStorage.setItem(SESS,JSON.stringify({store:S.store,pw:S.pw,seller:S.seller||''}));else localStorage.removeItem(SESS)}catch(e){}}
+async function restoreSess(){try{const d=JSON.parse(localStorage.getItem(SESS)||'null');if(!d||!HASH[d.store]||!d.pw)return;
+  if((await sha(String(d.pw).trim().toUpperCase()))!==HASH[d.store]){localStorage.removeItem(SESS);return}
+  if(S.store)return;S.store=d.store;S.pw=d.pw;S.seller=d.seller||'';if(!S.view)S.view=S.store;render()}catch(e){}}
+/* venda = baixa com motivo Venda (lançamentos antigos, sem motivo, contam como venda) */
+const isSale=e=>e.type==='Baixa'&&!e.reverted&&(!e.reason||e.reason==='Venda');
+const isTransf=e=>/^Transfer/.test(e.reason||'');
 const qty=(id,st)=>{const p=PRODUCTS.find(x=>x[0]===id);return p?p[3][STORES.findIndex(s=>s[0]===st)]:0};
 const lvl=v=>v===0?'z':v<=2?'l':'o';
 const sumStore=st=>PRODUCTS.reduce((a,p)=>a+qty(p[0],st),0);
@@ -140,7 +149,7 @@ const idOf=code=>String(code).replace(/\D/g,'');
 function load(data){
   PRODUCTS=data.products.map(p=>[idOf(p.code),p.code,p.name,STORES.map(([s])=>Number(p.qty[s])||0)]);
   S.log=(data.log||[]).map(e=>({...e,code:idOf(e.code)}));
-  buildHist();S.loading=false;S.error=null;
+  S.apiV=Number(data.v)||1;buildHist();S.loading=false;S.error=null;
 }
 async function refresh(){
   if(S.busy)return;
@@ -158,7 +167,7 @@ async function post(body){
 }
 async function apply(id,st,type,n,x){
   const p=PRODUCTS.find(q=>q[0]===id);
-  return post({action:'move',store:st,code:p[1],type,qty:n,pw:S.pw,entryPw:x.entryPw||'',note:x.note||'',seller:x.seller||'',order:x.order||''});
+  return post({action:'move',store:st,code:p[1],type,qty:n,reason:x.reason||'',dest:x.dest||'',pw:S.pw,entryPw:x.entryPw||'',note:x.note||'',seller:x.seller||'',order:x.order||''});
 }
 async function revert(entryId,entryPw){
   const e=S.log.find(x=>x.id===entryId);if(!e||e.reverted||e.store!==S.store)return;
@@ -211,7 +220,7 @@ function vLoja(){
   <div class="grid">${L.map(p=>{const n=qty(p[0],v),[tx,c]=lbl[lvl(n)];
    return `<div class="pc"><div class="sp2"><div><span class="code">${esc(p[1])}</span><div class="pn" style="margin-bottom:0">${esc(p[2])}</div></div><div><div class="big" style="${n===0?'color:#9aa3b2':''}">${n}</div><div style="text-align:right"><span class="pill" style="--c:var(${c})">${tx}</span></div></div></div>
    ${own?`<div class="acts"><button class="btn red" data-a="baixa" data-id="${p[0]}" ${n===0?'disabled':''}>− Dar baixa</button><button class="btn e" data-a="entrada" data-id="${p[0]}" aria-label="Registrar entrada (exige senha)">🔒＋</button></div>`:''}</div>`}).join('')||`<div class="empty">Nenhum produto encontrado.</div>`}</div>
-  <div class="card"><h2>Últimos lançamentos · Loja ${v}</h2>${lg.length?lg.map(e=>{const p=PRODUCTS.find(x=>x[0]===e.code);return `<div class="lg" style="${e.reverted?'opacity:.5':''}"><div><b class="${e.type==='Baixa'?'down':'up'}">${e.type==='Baixa'?'−':'+'}${e.qty}</b> ${p?esc(short(p[2])):esc(e.code)}${e.reverted?' <i>(estornada)</i>':''}<small>${e.ts?fmt(e.ts):esc(e.data||'')}${e.seller?' · Vend.: '+esc(e.seller):''}${e.order?' · Pedido: '+esc(e.order):''}${e.note?' · '+esc(e.note):''}</small></div>${own&&!e.reverted?`<button class="btn sm" data-a="revert" data-id="${esc(e.id)}">Estornar</button>`:''}</div>`}).join(''):`<div class="empty">Nenhum lançamento ainda nesta loja.</div>`}</div>`;
+  <div class="card"><h2>Últimos lançamentos · Loja ${v}</h2>${lg.length?lg.map(e=>{const p=PRODUCTS.find(x=>x[0]===e.code);return `<div class="lg" style="${e.reverted?'opacity:.5':''}"><div><b class="${e.type==='Baixa'?'down':'up'}">${e.type==='Baixa'?'−':'+'}${e.qty}</b> ${p?esc(short(p[2])):esc(e.code)}${e.reverted?' <i>(estornada)</i>':''}<small>${e.ts?fmt(e.ts):esc(e.data||'')}${e.reason&&e.reason!=='Venda'?' · <b>'+esc(e.reason)+'</b>':''}${e.seller?' · Vend.: '+esc(e.seller):''}${e.order?' · Pedido: '+esc(e.order):''}${e.note?' · '+esc(e.note):''}</small></div>${own&&!e.reverted&&!(e.type==='Entrada'&&isTransf(e))?`<button class="btn sm" data-a="revert" data-id="${esc(e.id)}">Estornar</button>`:''}</div>`}).join(''):`<div class="empty">Nenhum lançamento ainda nesta loja.</div>`}</div>`;
 }
 
 /* ---------- aba: vendas ---------- */
@@ -224,7 +233,7 @@ function salesData(filter){
     const byP=PRODUCTS.map((_,pi)=>stores.reduce((a,s)=>a+HIST[s][i][pi],0));
     months.push({label:MES[dt.getMonth()],y:dt.getFullYear(),dim:dim(dt.getFullYear(),dt.getMonth()),byP,total:byP.reduce((a,b)=>a+b,0)});}
   const start=new Date(y,m,1).getTime();
-  const real=S.log.filter(e=>e.type==='Baixa'&&!e.reverted&&e.ts>=start&&stores.includes(e.store));
+  const real=S.log.filter(e=>isSale(e)&&e.ts>=start&&stores.includes(e.store));
   const curP=PRODUCTS.map(p=>real.filter(e=>e.code===p[0]).reduce((a,e)=>a+e.qty,0));
   const cur=curP.reduce((a,b)=>a+b,0);
   const curStore=Object.fromEntries(STORES.map(([s])=>[s,real.filter(e=>e.store===s).reduce((a,e)=>a+e.qty,0)]));
@@ -258,7 +267,7 @@ function vVendasInner(){
   const rows=STORES.map(([s,n])=>{const t=HIST[s][4].reduce((a,b)=>a+b,0),ps=t*D.d/prev.dim;return {s,n,cur:D.curStore[s],prev:t,v:pct(D.curStore[s],ps)}});
   const top=PRODUCTS.map((p,i)=>({p,cur:D.curP[i],prev:prev.byP[i],avg:Math.round(D.months.slice(2).reduce((a,x)=>a+x.byP[i],0)/3*10)/10})).sort((a,b)=>b.avg-a.avg).slice(0,6);
   return `<div class="chips">${[['all','Todas as lojas'],...STORES.map(([s,n])=>[s,`${s} · ${n}`])].map(([k,l])=>`<button class="chip" aria-pressed="${S.vs===k}" data-a="vs" data-v="${k}">${l}</button>`).join('')}</div>
-  <div class="note">Mês atual = baixas registradas neste app. Os 5 meses anteriores são <b>dados de exemplo</b> até você enviar as vendas reais.</div>
+  <div class="note">Mês atual = baixas por venda registradas neste app (transferência e avaria não contam). Os 5 meses anteriores são <b>dados de exemplo</b> até você enviar as vendas reais.</div>
   <div class="hs"><div class="kp"><b>${D.cur}</b><span>vendidas em ${ml} (até dia ${D.d})</span></div>
   <div class="kp"><b>${Math.round(prevSame*10)/10}</b><span>mesmo período de ${prev.label}</span></div>
   <div class="kp"><b style="font-size:20px;line-height:1.5">${vtxt(vp)}</b><span>variação vs. ${prev.label}</span></div>
@@ -305,7 +314,7 @@ function loginModal(pre){
   $('#eye').onclick=()=>{pw.type=pw.type==='password'?'text':'password'};
   const submit=async()=>{if(!pw.value.trim())return;gob.disabled=true;gob.textContent='Verificando…';
     let ok=false;try{ok=(await sha(pw.value.trim().toUpperCase()))===HASH[$('#ls2').value]}catch(e){}
-    if(ok){S.store=$('#ls2').value;S.pw=pw.value.trim();S.view=S.store;close();render();toast(`✓ Loja ${S.store} liberada`)}
+    if(ok){S.store=$('#ls2').value;S.pw=pw.value.trim();S.view=S.store;saveSess();close();render();toast(`✓ Loja ${S.store} liberada`)}
     else{pw.classList.add('err');$('#pe').textContent='Senha incorreta para esta loja';gob.disabled=false;gob.textContent='Entrar';pw.select()}};
   gob.onclick=submit;pw.addEventListener('keydown',e=>{if(e.key==='Enter')submit()});
 }
@@ -313,26 +322,30 @@ function moveModal(id,type){
   const p=PRODUCTS.find(x=>x[0]===id),cur=qty(id,S.store),max=type==='Baixa'?cur:999;
   modal(`<h3>${type==='Baixa'?'Dar baixa':'Registrar entrada'} · Loja ${S.store}</h3><p class="sub"><span class="code">${esc(p[1])}</span> ${esc(p[2])}<br>Saldo atual: <b>${cur}</b></p>
   <label>Quantidade</label><div class="step"><button class="btn" id="mi" type="button" aria-label="Menos">−</button><input id="mq" type="number" min="1" max="${max}" value="1" inputmode="numeric"><button class="btn" id="pl" type="button" aria-label="Mais">＋</button></div><div class="errm" id="me"></div>
+  ${type==='Baixa'&&S.apiV>=2?`<label for="mr">Motivo da baixa</label><select id="mr"><option value="Venda">Venda</option><option value="Transferência">Transferência para outra loja</option><option value="Avaria">Avaria ou outro motivo</option></select><div id="mdw" hidden><label for="md">Loja de destino</label><select id="md">${STORES.filter(([s])=>s!==S.store).map(([s,n])=>`<option value="${s}">${s} · ${n}</option>`).join('')}</select><p class="sub" style="margin-top:6px">Sai desta loja e entra na loja de destino. Não conta como venda.</p></div>`:''}
   ${type==='Baixa'?`<label for="mv">Nome do vendedor</label><input id="mv" placeholder="Opcional" autocomplete="off" value="${esc(S.seller||'')}"><label for="mp">Nome ou nº do pedido</label><input id="mp" placeholder="Opcional" autocomplete="off">`:''}
   <label for="mn">Observação (cliente, NF, motivo)</label><input id="mn" placeholder="Opcional">
   ${type==='Entrada'?`<label for="ep">🔒 Senha de entrada</label><input id="ep" type="password" autocomplete="off" autocapitalize="characters" placeholder="Senha para dar entrada"><div class="errm" id="epe"></div>`:''}
   <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn ${type==='Baixa'?'red':'pri'}" id="ok">Confirmar ${type==='Baixa'?'baixa':'entrada'}</button></div>`);
-  const q=$('#mq'),ok=$('#ok');
+  const q=$('#mq'),ok=$('#ok'),mr=$('#mr');
+  const okTxt=()=>type==='Entrada'?'Confirmar entrada':mr&&mr.value==='Transferência'?'Confirmar transferência':'Confirmar baixa';
+  if(mr)mr.addEventListener('change',()=>{$('#mdw').hidden=mr.value!=='Transferência';ok.textContent=okTxt()});
   const ep=$('#ep');const val=()=>{const n=parseInt(q.value);let m='';if(!(n>0))m='Informe uma quantidade maior que zero';else if(type==='Baixa'&&n>cur)m=`Só há ${cur} unidade(s) em estoque`;$('#me').textContent=m;ok.disabled=!!m||(ep&&!ep.value.trim());return !m};
   if(ep){ok.disabled=true;ep.addEventListener('input',()=>{ep.classList.remove('err');$('#epe').textContent='';val()})}
   q.addEventListener('input',val);$('#mi').onclick=()=>{q.value=Math.max(1,(parseInt(q.value)||1)-1);val()};$('#pl').onclick=()=>{q.value=Math.min(max,(parseInt(q.value)||0)+1);val()};
   ok.onclick=async()=>{if(!val())return;ok.disabled=true;
     if(ep){ok.textContent='Verificando…';if(!(await checkEntryPw(ep.value))){ep.classList.add('err');$('#epe').textContent='Senha de entrada incorreta';ok.disabled=false;ok.textContent='Confirmar entrada';ep.select();return}}
-    ok.textContent='Salvando…';const n=parseInt(q.value);const sel=type==='Baixa'?$('#mv').value.trim():'';if(type==='Baixa')S.seller=sel;
-    const r=await apply(id,S.store,type,n,{note:$('#mn').value.trim(),seller:sel,order:type==='Baixa'?$('#mp').value.trim():'',entryPw:ep?ep.value.trim():''});
-    if(r.ok){close();toast(`✓ ${type} de ${n} un registrada`)}
-    else{$('#me').textContent=r.error;ok.disabled=false;ok.textContent=`Confirmar ${type==='Baixa'?'baixa':'entrada'}`}};
+    ok.textContent='Salvando…';const n=parseInt(q.value);const sel=type==='Baixa'?$('#mv').value.trim():'';if(type==='Baixa'){S.seller=sel;saveSess()}
+    const reason=mr?mr.value:'',dest=reason==='Transferência'?$('#md').value:'';
+    const r=await apply(id,S.store,type,n,{note:$('#mn').value.trim(),seller:sel,order:type==='Baixa'?$('#mp').value.trim():'',entryPw:ep?ep.value.trim():'',reason,dest});
+    if(r.ok){close();toast(dest?`✓ ${n} un transferida(s) para a loja ${dest}`:`✓ ${type} de ${n} un registrada`)}
+    else{$('#me').textContent=r.error;ok.disabled=false;ok.textContent=okTxt()}};
 }
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a;
   if(a==='tab'){if(t.dataset.v==='loja'&&!S.view)S.view=S.store;go(t.dataset.v)}
   else if(a==='login')loginModal(t.dataset.s);
-  else if(a==='logout'){S.store=null;S.pw=null;S.mgr=false;render();toast('Sessão encerrada')}
+  else if(a==='logout'){S.store=null;S.pw=null;S.mgr=false;saveSess();render();toast('Sessão encerrada')}
   else if(a==='close')close();
   else if(a==='retry'){S.loading=true;render();refresh()}
   else if(a==='baixa')moveModal(t.dataset.id,'Baixa');else if(a==='entrada')moveModal(t.dataset.id,'Entrada');
@@ -359,7 +372,7 @@ addEventListener('hashchange',()=>{const x=location.hash.slice(1);if(TABS.some(t
 /* atualiza sozinho a cada 30 s e quando o app volta para a tela, sem atrapalhar um formulário aberto */
 setInterval(()=>{if(!document.hidden&&!$('#ov'))refresh()},30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#ov'))refresh()});
-render();refresh();
+render();restoreSess();refresh();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
