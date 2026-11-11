@@ -144,6 +144,8 @@ const ABR={'02':'Constrol.','41':'Maderon','51':'Construt.','85':'Madecor','87':
 /* título curto do produto: o que diferencia um modelo do outro (BTUs · tecnologia · linha · marca) */
 function title(n){const N=String(n).toUpperCase(),t=[];
   const b=N.match(/(\d[\d.]*)\s*BTU/);if(b){let v=parseInt(b[1].replace(/\./g,''))||0;if(v<1000)v*=1000;t.push(String(v).replace(/\B(?=(\d{3})+$)/g,'.')+' BTUs')}
+  /* sem "BTUS" no nome: lê do código do modelo (PAC12FTW = 12.000) */
+  else{const c=N.match(/\b[A-Z]{2,4}(9|09|12|18|22|24|30|36)[A-Z]{2,}\b/);if(c)t.push(parseInt(c[1])+'.000 BTUs')}
   if(/INVERTER/.test(N))t.push('Inverter');else if(/\bOFF\b/.test(N))t.push('On/Off');
   const l=N.match(/\b(ELITE|T-PRO|ECO)\b/);if(l)t.push(l[1]==='T-PRO'?'T-Pro':l[1][0]+l[1].slice(1).toLowerCase());
   const m=N.match(/\b(TCL|PHILCO|ELGIN|LG|SAMSUNG|GREE|MIDEA|AGRATTO|CONSUL|ELECTROLUX|SPRINGER|DAIKIN|FUJITSU|HISENSE|BRITANIA)\b/);if(m)t.push(m[1].length<=3?m[1]:m[1][0]+m[1].slice(1).toLowerCase());
