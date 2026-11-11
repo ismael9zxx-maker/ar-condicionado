@@ -80,16 +80,21 @@ h2{font-size:15px;font-weight:700}
 .vr:last-child{border-bottom:0}.vr.h{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
 .vr span:not(:first-child){text-align:right;font-family:var(--mono)}
 /* aba Compras: compacta, uma linha por produto, um campo por loja */
-.osum{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.osum .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.osum .top .val{font-family:var(--mono);font-size:18px;font-weight:700}
-.osum .top .un{font-size:13px;color:var(--mut)}.osum .top .un b{color:var(--tx);font-family:var(--mono)}
-.osum .top .bt{margin-left:auto;display:flex;gap:6px}
-.osum .warn{font-size:12px;color:var(--baixo)}
-.ost{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
-.ost div{background:var(--hov);border-radius:8px;padding:4px 2px;text-align:center;font-size:11px;color:var(--mut);line-height:1.25}
-.ost b{display:block;font-family:var(--mono);font-size:13px;color:var(--tx)}
-.ost .up{color:var(--ok)}.ost .all{background:var(--tx);color:#cfd6e4}.ost .all b{color:#fff}
+.osum{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;display:grid;gap:10px}
+.okp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.okp div{border:1px solid var(--bd);border-radius:9px;padding:5px 8px}
+.okp b{display:block;font-family:var(--mono);font-size:16px;line-height:1.2}
+.okp span{font-size:10.5px;color:var(--mut)}
+.okp .vl{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--tx);border-color:var(--tx)}.okp .vl b{font-size:18px;white-space:nowrap}.okp .vl b{color:#fff}.okp .vl span{color:#cfd6e4}
+.osum .warn{font-size:11.5px;color:var(--baixo)}
+.osum .bt{display:flex;gap:6px}.osum .bt .btn{flex:1}
+.otb{font-size:12.5px}
+.otb div{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:6px;padding:4px 0;border-bottom:1px solid var(--bd)}
+.otb div:last-child{border-bottom:0;font-weight:700}
+.otb span:not(:first-child){text-align:right;font-family:var(--mono)}
+.otb .h{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.otb .up{color:var(--ok)}
+@media(min-width:800px){.osum{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start;column-gap:18px}.osum .left{display:grid;gap:8px}}
 .ot{background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
 .orow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.05fr);gap:4px 5px;padding:8px 10px;border-bottom:1px solid var(--bd)}
 .orow:last-child{border-bottom:0}
@@ -343,10 +348,14 @@ function ordTotals(){let u=0,v=0;const by={};STORES.forEach(([s])=>by[s]=0);
 function vOrdSum(){
   const T=ordTotals(),now=STORES.map(([s])=>sumStore(s)),all=now.reduce((a,b)=>a+b,0);
   const noPrice=PRODUCTS.filter(p=>oTot(p[0])>0&&!money(O.p[p[0]])).length;
-  return `<div class="osum"><div class="top"><span class="val">${brl(T.v)}</span><span class="un"><b>${T.u}</b> un no pedido</span>
-   <span class="bt"><button class="btn pri sm" data-a="ocopy" ${T.u?'':'disabled'}>Copiar pedido</button><button class="btn sm" data-a="oclear" ${T.u||Object.keys(O.p).length?'':'disabled'}>Limpar</button></span></div>
+  return `<div class="osum"><div class="left">
+   <div class="okp"><div><b>${all}</b><span>estoque hoje</span></div><div><b style="color:var(--ac)">${T.u}</b><span>no pedido</span></div>
+    <div><b>${all+T.u}</b><span>estoque depois</span></div><div class="vl"><span>valor do pedido</span><b>${brl(T.v)}</b></div></div>
    ${noPrice?`<span class="warn">${noPrice} ${noPrice===1?'produto está':'produtos estão'} no pedido sem custo unitário.</span>`:''}
-   <div class="ost">${STORES.map(([s],i)=>`<div>${s}<b>${now[i]}${T.by[s]?` <span class="up">→ ${now[i]+T.by[s]}</span>`:''}</b></div>`).join('')}<div class="all">Total<b>${all}${T.u?` → ${all+T.u}`:''}</b></div></div></div>`;
+   <div class="bt"><button class="btn pri sm" data-a="ocopy" ${T.u?'':'disabled'}>Copiar pedido</button><button class="btn sm" data-a="oclear" ${T.u||Object.keys(O.p).length?'':'disabled'}>Limpar</button></div></div>
+   <div class="otb"><div class="h"><span>Loja</span><span>Hoje</span><span>Pedido</span><span>Fica</span></div>
+   ${STORES.map(([s,n],i)=>`<div><span>${s} · ${n}</span><span>${now[i]}</span><span class="${T.by[s]?'up':''}">${T.by[s]?'+'+T.by[s]:'—'}</span><span>${now[i]+T.by[s]}</span></div>`).join('')}
+   <div><span>Total</span><span>${all}</span><span class="${T.u?'up':''}">${T.u?'+'+T.u:'—'}</span><span>${all+T.u}</span></div></div></div>`;
 }
 /* descrição simples: "Ar condicionado 9.000 Inverter". Linha/marca só entram se dois modelos ficarem iguais */
 function btuOf(n){const N=String(n).toUpperCase(),b=N.match(/(\d[\d.]*)\s*BTU/);if(b){let v=parseInt(b[1].replace(/\./g,''))||0;if(v<1000)v*=1000;return v}
