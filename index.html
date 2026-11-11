@@ -28,7 +28,7 @@ h1{font-size:16px;font-weight:700;line-height:1.2}.sub{font-size:12px;color:var(
 .btn.sm{padding:6px 12px;min-height:36px;font-size:13px}
 .who{background:color-mix(in srgb,var(--ok) 13%,transparent);color:var(--ok);font-weight:600;padding:6px 12px;border-radius:99px;font-size:13px;white-space:nowrap}
 .sess{display:flex;gap:8px;align-items:center}
-nav.bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:var(--sb);z-index:30}
+nav.bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:var(--sb);z-index:30}
 nav.bar button{background:none;border:0;padding:8px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:var(--mut);min-height:56px}
 nav.bar button span{font-size:20px;line-height:1}
 nav.bar button[aria-selected=true]{color:var(--ac)}
@@ -79,6 +79,28 @@ h2{font-size:15px;font-weight:700}
 .vr{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:13.5px}
 .vr:last-child{border-bottom:0}.vr.h{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
 .vr span:not(:first-child){text-align:right;font-family:var(--mono)}
+/* aba Compras */
+.oc{display:grid;grid-template-columns:40px repeat(5,minmax(0,1fr)) minmax(0,1.15fr);gap:4px;align-items:center;margin-top:10px}
+.oc .h{font-size:11px;font-weight:700;color:var(--mut);text-align:center}
+.oc .lb{font-size:11px;font-weight:700;color:var(--mut)}
+.oc .v{text-align:center;font-family:var(--mono);font-size:14px;padding:4px 0}
+.oc .v.f{font-weight:700}.oc .v.f.up{color:var(--ok)}
+.oc .tot{background:var(--tx);color:#fff;border-radius:8px;text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;padding:5px 0}
+.oc .tot.up{background:var(--ok)}
+.oc input,.pr input{width:100%;min-width:0;border:1px solid var(--bd);border-radius:8px;padding:7px 2px;text-align:center;font-family:var(--mono);font-size:16px;background:#fff;min-height:38px}
+.oc input:focus,.pr input:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 15%,transparent);outline:0}
+.oc input.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 7%,#fff);font-weight:700}
+.pr{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.pr label{font-size:12px;font-weight:600;color:var(--mut)}
+.pr input{width:120px;text-align:right;padding:7px 10px}
+.pr .stt{margin-left:auto;text-align:right;font-family:var(--mono);font-size:13px;color:var(--mut)}
+.pr .stt b{display:block;font-size:16px;color:var(--tx)}
+.pc.has{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+.sr{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:6px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13.5px;align-items:center}
+.sr:last-child{border-bottom:0}.sr span:not(:first-child){text-align:right;font-family:var(--mono)}
+.sr.h{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.sr.t{font-weight:700}
+.money{font-family:var(--mono);font-size:22px;font-weight:600}
 .overlay{position:fixed;inset:0;background:rgba(10,15,30,.5);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:50}
 .modal{background:var(--card);border-radius:20px 20px 0 0;width:min(480px,100%);padding:20px 18px calc(18px + var(--sb));max-height:92vh;overflow:auto;animation:up .22s ease}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
@@ -137,8 +159,9 @@ const IC={box:svg('<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 
  chart:svg('<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>'),
  lock:svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
  unlock:svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>'),
- eye:svg('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>')};
-const TABS=[['todas',IC.box,'Todas as lojas'],['loja',IC.store,'Minha loja'],['vendas',IC.chart,'Vendas']];
+ eye:svg('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+ cart:svg('<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h12l2-8H6.2"/>')};
+const TABS=[['todas',IC.box,'Todas as lojas'],['loja',IC.store,'Minha loja'],['vendas',IC.chart,'Vendas'],['compras',IC.cart,'Compras']];
 /* nome curto da loja para as colunas de "Todas as lojas" */
 const ABR={'02':'Constrol.','41':'Maderon','51':'Construt.','85':'Madecor','87':'Distrib.'};
 /* título curto do produto: o que diferencia um modelo do outro (BTUs · tecnologia · linha · marca) */
@@ -274,9 +297,88 @@ function chartVendas(D){
 const pct=(a,b)=>b>0?Math.round((a-b)/b*100):null;
 const vtxt=p=>p===null?'—':`<span class="${p>=0?'up':'down'}">${p>=0?'▲':'▼'} ${Math.abs(p)}%</span>`;
 function vLock(){
-  return `<div class="card" style="max-width:420px;margin:24px auto;text-align:center"><div style="font-size:40px;color:var(--mut)">${IC.lock}</div><h2 style="margin:6px 0 4px">Área da gerência</h2><p class="sub" style="margin-bottom:14px">Os dados de venda são restritos. Digite a senha para acessar.</p>
+  return `<div class="card" style="max-width:420px;margin:24px auto;text-align:center"><div style="font-size:40px;color:var(--mut)">${IC.lock}</div><h2 style="margin:6px 0 4px">Área da gerência</h2><p class="sub" style="margin-bottom:14px">Vendas e compras são restritas. Digite a senha para acessar.</p>
   <input class="search" id="gp" type="password" autocomplete="off" placeholder="Senha da gerência" aria-label="Senha da gerência"><div class="errm" id="gpe" style="text-align:left"></div>
-  <button class="btn pri" id="gpb" data-a="unlock" style="width:100%;margin-top:6px">Acessar vendas</button></div>`;
+  <button class="btn pri" id="gpb" data-a="unlock" style="width:100%;margin-top:6px">Acessar</button></div>`;
+}
+
+/* ---------- aba: compras (montar pedido) ---------- */
+/* o rascunho do pedido fica salvo neste aparelho */
+const OKEY='ar-pedido';
+const O={q:{},p:{},of:'all'};
+try{const d=JSON.parse(localStorage.getItem(OKEY)||'null');if(d){O.q=d.q||{};O.p=d.p||{}}}catch(e){}
+function saveOrd(){try{localStorage.setItem(OKEY,JSON.stringify({q:O.q,p:O.p}))}catch(e){}}
+const brl=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+function money(s){s=String(s||'').replace(/[^\d,.]/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isNaN(n)?0:n}
+const oq=(id,st)=>Math.max(0,parseInt((O.q[id]||{})[st])||0);
+const oTot=id=>STORES.reduce((a,[s])=>a+oq(id,s),0);
+const pTot=p=>STORES.reduce((a,[s])=>a+qty(p[0],s),0);
+/* média de vendas por mês: últimos 3 meses fechados (ou o mês atual, se ainda não há histórico) */
+function avgSale(id){const n=new Date(),k=o=>{const d=new Date(n.getFullYear(),n.getMonth()+o,1);return d.getFullYear()+'-'+pad(d.getMonth()+1)};
+  const sum=key=>STORES.reduce((a,[s])=>a+(S.sales[key+'|'+s+'|'+id]||0),0);
+  const h=[-3,-2,-1].map(o=>sum(k(o)));if(h.some(x=>x>0))return Math.round(h.reduce((a,b)=>a+b,0)/3*10)/10;
+  return sum(k(0))}
+function ordTotals(){let u=0,v=0;const by={};STORES.forEach(([s])=>by[s]=0);
+  PRODUCTS.forEach(p=>{const t=oTot(p[0]);u+=t;v+=t*money(O.p[p[0]]);STORES.forEach(([s])=>by[s]+=oq(p[0],s))});return {u,v,by}}
+function vOrdSum(){
+  const T=ordTotals(),now=STORES.map(([s])=>sumStore(s)),all=now.reduce((a,b)=>a+b,0);
+  const noPrice=PRODUCTS.filter(p=>oTot(p[0])>0&&!money(O.p[p[0]])).length;
+  return `<div class="hs"><div class="kp"><b>${all}</b><span>estoque total hoje</span></div>
+   <div class="kp"><b style="color:var(--ac)">${T.u}</b><span>unidades no pedido</span></div>
+   <div class="kp"><b>${all+T.u}</b><span>estoque depois do pedido</span></div></div>
+  <div class="card"><div class="row sp"><h2>Valor do pedido</h2><span class="money">${brl(T.v)}</span></div>
+   ${noPrice?`<p class="sub" style="color:var(--baixo);margin-top:4px">${noPrice} ${noPrice===1?'modelo está':'modelos estão'} no pedido sem custo unitário.</p>`:''}
+   <div class="sr h" style="margin-top:8px"><span>Loja</span><span>Hoje</span><span>Pedido</span><span>Fica</span></div>
+   ${STORES.map(([s,n],i)=>`<div class="sr"><span>${s} · ${n}</span><span>${now[i]}</span><span${T.by[s]?' class="up"':''}>${T.by[s]?'+'+T.by[s]:'—'}</span><span>${now[i]+T.by[s]}</span></div>`).join('')}
+   <div class="sr t"><span>Total</span><span>${all}</span><span${T.u?' class="up"':''}>${T.u?'+'+T.u:'—'}</span><span>${all+T.u}</span></div>
+   <div class="acts"><button class="btn pri" data-a="ocopy" ${T.u?'':'disabled'}>Copiar pedido</button><button class="btn" data-a="oclear" ${T.u||Object.keys(O.p).length?'':'disabled'}>Limpar</button></div></div>`;
+}
+function vOrdCard(p){
+  const id=p[0],t=oTot(id),pr=money(O.p[id]),av=avgSale(id),tp=pTot(p);
+  return `<div class="pc ${t?'has':''}" id="oc-${id}"><span class="code">${esc(p[1])}</span><div class="pn">${esc(title(p[2]))}</div><div class="fn">${esc(p[2])}</div>
+   <div class="mini" style="margin-top:6px"><span><b>${tp}</b> em estoque</span><span><b>${String(av).replace('.',',')}</b> vendas/mês</span>${av>0?`<span>dura <b>${String(Math.round(tp/av*10)/10).replace('.',',')}</b> ${tp/av===1?'mês':'meses'}</span>`:''}</div>
+   <div class="oc"><span></span>${STORES.map(([s])=>`<span class="h">${s}</span>`).join('')}<span class="h">Total</span>
+    <span class="lb">Hoje</span>${STORES.map(([s])=>`<span class="v">${qty(id,s)}</span>`).join('')}<span class="tot">${tp}</span>
+    <span class="lb">Pedir</span>${STORES.map(([s])=>{const v=oq(id,s);return `<input id="oq-${id}-${s}" class="${v?'on':''}" data-o="q" data-id="${id}" data-s="${s}" inputmode="numeric" autocomplete="off" value="${v||''}" placeholder="0" aria-label="Pedir para a loja ${s} ${NAME[s]}">`}).join('')}<span class="tot up" id="ot-${id}">${t}</span>
+    <span class="lb">Fica</span>${STORES.map(([s])=>{const v=oq(id,s);return `<span class="v f ${v?'up':''}" id="of-${id}-${s}">${qty(id,s)+v}</span>`}).join('')}<span class="tot" id="oft-${id}">${tp+t}</span></div>
+   <div class="pr"><label for="op-${id}">Custo unit.</label><input id="op-${id}" data-o="p" data-id="${id}" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00" value="${esc(O.p[id]||'')}">
+    <div class="stt" id="os-${id}">${t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':''}</div></div></div>`;
+}
+function vCompras(){
+  if(!S.mgr)return vLock();
+  const q=S.q.trim().toLowerCase();
+  let L=PRODUCTS.filter(p=>!q||(p[1]+p[2]).toLowerCase().includes(q));
+  if(O.of==='ped')L=L.filter(p=>oTot(p[0])>0);else if(O.of==='baixo')L=L.filter(p=>pTot(p)<=3);
+  return `<div class="row sp"><span class="sub">${IC.unlock} Área da gerência · montar pedido</span><button class="btn sm" data-a="lock">${IC.lock} Bloquear</button></div>
+  <div id="osum">${vOrdSum()}</div>
+  <div class="note">Digite quanto pedir para cada loja e o custo unitário. A linha <b>Fica</b> mostra como o estoque fica depois que o pedido chegar. O pedido é só uma simulação: fica salvo neste aparelho e não muda o estoque. Quando a mercadoria chegar, lance pela <b>Entrada</b> de cada loja.</div>
+  <input class="search" id="q" placeholder="Buscar código ou nome" value="${esc(S.q)}" aria-label="Buscar">
+  <div class="chips">${[['all','Todos'],['ped','Só o que está no pedido'],['baixo','Estoque baixo (até 3)']].map(([k,l])=>`<button class="chip" aria-pressed="${O.of===k}" data-a="of" data-v="${k}">${l}</button>`).join('')}</div>
+  <div class="grid">${L.map(vOrdCard).join('')||`<div class="empty">Nenhum produto encontrado.</div>`}</div>`;
+}
+/* atualiza só os números do cartão e o resumo, sem redesenhar a tela (o teclado não fecha) */
+function ordUpdate(id){
+  const p=PRODUCTS.find(x=>x[0]===id);if(!p)return;const t=oTot(id),tp=pTot(p),pr=money(O.p[id]);
+  STORES.forEach(([s])=>{const v=oq(id,s),f=$('#of-'+id+'-'+s),i=$('#oq-'+id+'-'+s);if(f){f.textContent=qty(id,s)+v;f.classList.toggle('up',v>0)}if(i)i.classList.toggle('on',v>0)});
+  const ot=$('#ot-'+id);if(ot)ot.textContent=t;const oft=$('#oft-'+id);if(oft)oft.textContent=tp+t;
+  const os=$('#os-'+id);if(os)os.innerHTML=t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':'';
+  const c=$('#oc-'+id);if(c)c.classList.toggle('has',t>0);
+  const sm=$('#osum');if(sm)sm.innerHTML=vOrdSum();
+}
+function ordText(){
+  const d=new Date(),T=ordTotals(),L=[`PEDIDO DE COMPRA · AR CONDICIONADO`,`Home Center Romanos · ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`,''];
+  PRODUCTS.filter(p=>oTot(p[0])>0).forEach(p=>{const t=oTot(p[0]),pr=money(O.p[p[0]]);
+    L.push(`${p[1]} · ${p[2]}`);
+    L.push('  '+STORES.filter(([s])=>oq(p[0],s)>0).map(([s,n])=>`${s} ${n}: ${oq(p[0],s)}`).join(' | '));
+    L.push(`  Total: ${t} un${pr?` × ${brl(pr)} = ${brl(t*pr)}`:''}`);L.push('')});
+  L.push('Por loja: '+STORES.filter(([s])=>T.by[s]>0).map(([s])=>`${s}: ${T.by[s]}`).join(' | '));
+  L.push(`TOTAL DO PEDIDO: ${T.u} un${T.v?` · ${brl(T.v)}`:''}`);
+  return L.join('\n');
+}
+async function ordCopy(){
+  const txt=ordText();
+  try{await navigator.clipboard.writeText(txt);toast('✓ Pedido copiado. Cole no WhatsApp ou no e-mail.')}
+  catch(e){modal(`<h3>Pedido de compra</h3><p class="sub">Selecione o texto e copie.</p><textarea readonly style="width:100%;height:50vh;margin-top:10px;font-family:var(--mono);font-size:12.5px;border:1px solid var(--bd);border-radius:12px;padding:10px">${esc(txt)}</textarea><div class="mf"><span></span><button class="btn pri" data-a="close">Fechar</button></div>`)}
 }
 function vVendas(){
   if(!S.mgr)return vLock();
@@ -314,10 +416,11 @@ function render(){
   const app=$('#app');
   if(S.loading){app.innerHTML=`<div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>`;return}
   if(S.error&&!PRODUCTS.length){app.innerHTML=`<div class="banner">${esc(S.error)}</div><button class="btn pri" data-a="retry">Tentar de novo</button>`;return}
-  const act=document.activeElement,keep=act&&act.id==='q'?act.selectionStart:-1;
+  /* devolve o foco ao campo que estava sendo digitado (busca, quantidades e custos do pedido) */
+  const act=document.activeElement,fid=act&&act.id&&app.contains(act)?act.id:null;let keep=null;try{keep=act.selectionStart}catch(e){}
   app.classList.toggle('an',ANIM);ANIM=false;
-  app.innerHTML=(S.error?`<div class="banner">${esc(S.error)}</div>`:'')+({todas:vTodas,loja:vLoja,vendas:vVendas}[S.tab])();
-  if(keep>=0){const q=$('#q');if(q){q.focus();q.setSelectionRange(keep,keep)}}
+  app.innerHTML=(S.error?`<div class="banner">${esc(S.error)}</div>`:'')+({todas:vTodas,loja:vLoja,vendas:vVendas,compras:vCompras}[S.tab])();
+  if(fid){const el=document.getElementById(fid);if(el){el.focus();try{if(keep!=null)el.setSelectionRange(keep,keep)}catch(e){}}}
 }
 
 /* ---------- login e movimentação ---------- */
@@ -403,7 +506,10 @@ document.addEventListener('click',e=>{
   else if(a==='gostore'){S.view=t.dataset.s;S.q='';S.fs='all';go('loja')}
   else if(a==='view'){S.view=t.dataset.s;render()}
   else if(a==='unlock')tryUnlock();
-  else if(a==='lock'){S.mgr=false;S.mgrPw=null;render();toast('Vendas bloqueadas')}
+  else if(a==='lock'){S.mgr=false;S.mgrPw=null;render();toast('Área da gerência bloqueada')}
+  else if(a==='of'){O.of=t.dataset.v;render()}
+  else if(a==='ocopy')ordCopy();
+  else if(a==='oclear'){if(confirm('Limpar todas as quantidades e custos do pedido?')){O.q={};O.p={};saveOrd();render();toast('Pedido limpo')}}
   else if(a==='fa'){S.fa=t.dataset.v;render()}
   else if(a==='fs'){S.fs=t.dataset.v;render()}
   else if(a==='vs'){S.vs=t.dataset.v;render()}
@@ -413,10 +519,14 @@ async function tryUnlock(){
   b.disabled=true;b.textContent='Verificando…';let ok=false;
   try{ok=(await sha(i.value.replace(/\s+/g,'').toUpperCase()))===MGR_HASH}catch(e){}
   if(ok){S.mgr=true;S.mgrPw=i.value;render();toast('✓ Acesso liberado')}
-  else{i.classList.add('err');$('#gpe').textContent='Senha incorreta';b.disabled=false;b.textContent='Acessar vendas';i.select()}
+  else{i.classList.add('err');$('#gpe').textContent='Senha incorreta';b.disabled=false;b.textContent='Acessar';i.select()}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='gp')tryUnlock()});
-document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;render()}else if(e.target.id==='gp'){e.target.classList.remove('err');$('#gpe').textContent=''}});
+document.addEventListener('input',e=>{const o=e.target.dataset&&e.target.dataset.o;
+  if(o==='q'){const id=e.target.dataset.id,s=e.target.dataset.s,v=e.target.value.replace(/\D/g,'').slice(0,4);if(e.target.value!==v)e.target.value=v;
+    O.q[id]=O.q[id]||{};if(+v>0)O.q[id][s]=+v;else delete O.q[id][s];if(!Object.keys(O.q[id]).length)delete O.q[id];saveOrd();ordUpdate(id);return}
+  if(o==='p'){const id=e.target.dataset.id;if(e.target.value.trim())O.p[id]=e.target.value.trim();else delete O.p[id];saveOrd();ordUpdate(id);return}
+  if(e.target.id==='q'){S.q=e.target.value;render()}else if(e.target.id==='gp'){e.target.classList.remove('err');$('#gpe').textContent=''}});
 const h=location.hash.slice(1);if(TABS.some(t=>t[0]===h))S.tab=h;
 addEventListener('hashchange',()=>{const x=location.hash.slice(1);if(TABS.some(t=>t[0]===x)&&x!==S.tab){S.tab=x;render()}});
 /* atualiza sozinho a cada 30 s e quando o app volta para a tela, sem atrapalhar um formulário aberto */
