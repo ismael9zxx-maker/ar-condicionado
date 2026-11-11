@@ -79,23 +79,34 @@ h2{font-size:15px;font-weight:700}
 .vr{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:13.5px}
 .vr:last-child{border-bottom:0}.vr.h{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
 .vr span:not(:first-child){text-align:right;font-family:var(--mono)}
-/* aba Compras */
-.oc{display:grid;grid-template-columns:40px repeat(5,minmax(0,1fr)) minmax(0,1.15fr);gap:4px;align-items:center;margin-top:10px}
-.oc .h{font-size:11px;font-weight:700;color:var(--mut);text-align:center}
-.oc .lb{font-size:11px;font-weight:700;color:var(--mut)}
-.oc .v{text-align:center;font-family:var(--mono);font-size:14px;padding:4px 0}
-.oc .v.f{font-weight:700}.oc .v.f.up{color:var(--ok)}
-.oc .tot{background:var(--tx);color:#fff;border-radius:8px;text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;padding:5px 0}
-.oc .tot.up{background:var(--ok)}
-.oc input,.pr input{width:100%;min-width:0;border:1px solid var(--bd);border-radius:8px;padding:7px 2px;text-align:center;font-family:var(--mono);font-size:16px;background:#fff;min-height:38px}
-.oc input:focus,.pr input:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 15%,transparent);outline:0}
-.oc input.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 7%,#fff);font-weight:700}
-.pr{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
-.pr label{font-size:12px;font-weight:600;color:var(--mut)}
-.pr input{width:120px;text-align:right;padding:7px 10px}
-.pr .stt{margin-left:auto;text-align:right;font-family:var(--mono);font-size:13px;color:var(--mut)}
-.pr .stt b{display:block;font-size:16px;color:var(--tx)}
-.pc.has{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+/* aba Compras: uma linha por produto, um campo por loja */
+.ot{background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.orow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.1fr);gap:6px 6px;padding:12px;border-bottom:1px solid var(--bd)}
+.orow:last-child{border-bottom:0}
+.orow.has{background:color-mix(in srgb,var(--ac) 5%,transparent)}
+.od{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.od b{font-size:15px}.od small{font-size:12px;color:var(--mut);white-space:nowrap}
+.oi{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.oi label{font-size:11px;font-weight:700;color:var(--mut)}
+.oi input{width:100%;min-width:0;border:1px solid var(--bd);border-radius:9px;padding:8px 2px;text-align:center;font-family:var(--mono);font-size:17px;background:#fff;min-height:44px}
+.oi input:focus,.oc2 input:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 15%,transparent);outline:0}
+.oi input.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 8%,#fff);font-weight:700}
+.oi small{font-size:10.5px;color:var(--mut);white-space:nowrap}
+.oi .tot{width:100%;min-height:44px;border-radius:9px;background:var(--tx);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:700}
+.oi .tot.up{background:var(--ok)}
+.oc2{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:4px}
+.oc2 label{font-size:12px;font-weight:600;color:var(--mut)}
+.oc2 input{width:120px;border:1px solid var(--bd);border-radius:9px;padding:8px 10px;text-align:right;font-family:var(--mono);font-size:16px;background:#fff;min-height:40px}
+.oc2 .stt{margin-left:auto;text-align:right;font-family:var(--mono);font-size:12px;color:var(--mut)}
+.oc2 .stt b{display:block;font-size:15px;color:var(--tx)}
+.ohead{display:none}
+@media(min-width:800px){
+ .ohead{display:grid;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;background:var(--hov)}
+ .orow{grid-template-columns:2.4fr repeat(5,minmax(0,.8fr)) minmax(0,.8fr) 1.3fr 1.2fr;align-items:center;gap:8px}
+ .od{grid-column:auto;flex-direction:column;align-items:flex-start;gap:0}
+ .oi label{display:none}.ohead span{text-align:center}.ohead span:first-child{text-align:left}
+ .oc2{display:contents}.oc2 label{display:none}.oc2 input{width:100%}
+ .orow.ohead .oc2{display:contents}}
 .sr{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:6px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13.5px;align-items:center}
 .sr:last-child{border-bottom:0}.sr span:not(:first-child){text-align:right;font-family:var(--mono)}
 .sr.h{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
@@ -203,7 +214,9 @@ async function refresh(){
   if(!/^https:\/\/script\.google\.com\//.test(API_URL)){S.loading=false;S.error='O link do Apps Script ainda não foi configurado.';render();return}
   try{const r=await fetch(API_URL+'?action=data&t='+Date.now());const d=await r.json();
     /* nada mudou na planilha: não redesenha a tela */
-    if(!S.busy&&(S.loading||S.error||JSON.stringify([d.products,d.log,d.sales,d.v])!==S.sig)){load(d);render()}}
+    if(!S.busy&&(S.loading||S.error||JSON.stringify([d.products,d.log,d.sales,d.v])!==S.sig)){
+      const f=document.activeElement;if(!S.loading&&f&&/^(INPUT|SELECT|TEXTAREA)$/.test(f.tagName)&&$('#app').contains(f))return;
+      load(d);render()}}
   catch(e){S.loading=false;S.error='Não foi possível carregar o estoque. Verifique a internet.';render()}
 }
 async function post(body){
@@ -333,42 +346,54 @@ function vOrdSum(){
    <div class="sr t"><span>Total</span><span>${all}</span><span${T.u?' class="up"':''}>${T.u?'+'+T.u:'—'}</span><span>${all+T.u}</span></div>
    <div class="acts"><button class="btn pri" data-a="ocopy" ${T.u?'':'disabled'}>Copiar pedido</button><button class="btn" data-a="oclear" ${T.u||Object.keys(O.p).length?'':'disabled'}>Limpar</button></div></div>`;
 }
-function vOrdCard(p){
-  const id=p[0],t=oTot(id),pr=money(O.p[id]),av=avgSale(id),tp=pTot(p);
-  return `<div class="pc ${t?'has':''}" id="oc-${id}"><span class="code">${esc(p[1])}</span><div class="pn">${esc(title(p[2]))}</div><div class="fn">${esc(p[2])}</div>
-   <div class="mini" style="margin-top:6px"><span><b>${tp}</b> em estoque</span><span><b>${String(av).replace('.',',')}</b> vendas/mês</span>${av>0?`<span>dura <b>${String(Math.round(tp/av*10)/10).replace('.',',')}</b> ${tp/av===1?'mês':'meses'}</span>`:''}</div>
-   <div class="oc"><span></span>${STORES.map(([s])=>`<span class="h">${s}</span>`).join('')}<span class="h">Total</span>
-    <span class="lb">Hoje</span>${STORES.map(([s])=>`<span class="v">${qty(id,s)}</span>`).join('')}<span class="tot">${tp}</span>
-    <span class="lb">Pedir</span>${STORES.map(([s])=>{const v=oq(id,s);return `<input id="oq-${id}-${s}" class="${v?'on':''}" data-o="q" data-id="${id}" data-s="${s}" inputmode="numeric" autocomplete="off" value="${v||''}" placeholder="0" aria-label="Pedir para a loja ${s} ${NAME[s]}">`}).join('')}<span class="tot up" id="ot-${id}">${t}</span>
-    <span class="lb">Fica</span>${STORES.map(([s])=>{const v=oq(id,s);return `<span class="v f ${v?'up':''}" id="of-${id}-${s}">${qty(id,s)+v}</span>`}).join('')}<span class="tot" id="oft-${id}">${tp+t}</span></div>
-   <div class="pr"><label for="op-${id}">Custo unit.</label><input id="op-${id}" data-o="p" data-id="${id}" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00" value="${esc(O.p[id]||'')}">
-    <div class="stt" id="os-${id}">${t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':''}</div></div></div>`;
+/* descrição simples: "Ar condicionado 9.000 Inverter". Linha/marca só entram se dois modelos ficarem iguais */
+function btuOf(n){const N=String(n).toUpperCase(),b=N.match(/(\d[\d.]*)\s*BTU/);if(b){let v=parseInt(b[1].replace(/\./g,''))||0;if(v<1000)v*=1000;return v}
+  const c=N.match(/\b[A-Z]{2,4}(9|09|12|18|22|24|30|36)[A-Z]{2,}\b/);return c?parseInt(c[1])*1000:0}
+const fmtBtu=v=>String(v).replace(/\B(?=(\d{3})+$)/g,'.');
+const tecOf=n=>/INVERTER/i.test(n)?'Inverter':/\bOFF\b/i.test(n)?'On/Off':'';
+const linOf=n=>{const l=String(n).toUpperCase().match(/\b(ELITE|T-PRO|ECO)\b/);return l?(l[1]==='T-PRO'?'T-Pro':l[1][0]+l[1].slice(1).toLowerCase()):''};
+const marOf=n=>{const m=String(n).toUpperCase().match(/\b(TCL|PHILCO|ELGIN|LG|SAMSUNG|GREE|MIDEA|AGRATTO|CONSUL|ELECTROLUX|SPRINGER|DAIKIN|FUJITSU|HISENSE|BRITANIA)\b/);return m?m[1]:''};
+function simpleNames(){const base=p=>{const b=btuOf(p[2]);return ('Ar condicionado '+(b?fmtBtu(b):'')+' '+tecOf(p[2])).replace(/\s+/g,' ').trim()};
+  const out={};
+  PRODUCTS.forEach(p=>{let n=base(p);
+    if(PRODUCTS.filter(q=>base(q)===n).length>1){const l=linOf(p[2]);const n2=(n+' '+l).trim();
+      n=PRODUCTS.filter(q=>(base(q)+' '+linOf(q[2])).trim()===n2).length>1?(n2+' '+marOf(p[2])).trim():n2}
+    out[p[0]]=n});return out}
+/* ordem do pedido: BTUs crescente, Inverter antes de On/Off */
+const ordList=()=>[...PRODUCTS].sort((a,b)=>btuOf(a[2])-btuOf(b[2])||tecOf(a[2]).localeCompare(tecOf(b[2]))||a[1].localeCompare(b[1]));
+function vOrdRow(p,nm){
+  const id=p[0],t=oTot(id),pr=money(O.p[id]),tp=pTot(p);
+  return `<div class="orow ${t?'has':''}" id="or-${id}">
+   <div class="od"><b>${esc(nm)}</b><small>cód. ${esc(p[1])} · estoque ${tp}</small></div>
+   ${STORES.map(([s])=>{const v=oq(id,s);return `<div class="oi"><label for="oq-${id}-${s}">${s}</label><input id="oq-${id}-${s}" class="${v?'on':''}" data-o="q" data-id="${id}" data-s="${s}" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${v||''}" placeholder="0" aria-label="${esc(nm)}: pedir para a loja ${s} ${NAME[s]}"><small>tem ${qty(id,s)}</small></div>`}).join('')}
+   <div class="oi"><label>Total</label><span class="tot ${t?'up':''}" id="ot-${id}">${t}</span><small>fica ${tp+t}</small></div>
+   <div class="oc2"><label for="op-${id}">Custo unit.</label><input id="op-${id}" data-o="p" data-id="${id}" type="text" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00" value="${esc(O.p[id]||'')}" aria-label="${esc(nm)}: custo unitário">
+    <div class="stt" id="os-${id}">${t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':'—'}</div></div></div>`;
 }
 function vCompras(){
   if(!S.mgr)return vLock();
-  const q=S.q.trim().toLowerCase();
-  let L=PRODUCTS.filter(p=>!q||(p[1]+p[2]).toLowerCase().includes(q));
-  if(O.of==='ped')L=L.filter(p=>oTot(p[0])>0);else if(O.of==='baixo')L=L.filter(p=>pTot(p)<=3);
+  const N=simpleNames();
   return `<div class="row sp"><span class="sub">${IC.unlock} Área da gerência · montar pedido</span><button class="btn sm" data-a="lock">${IC.lock} Bloquear</button></div>
   <div id="osum">${vOrdSum()}</div>
-  <div class="note">Digite quanto pedir para cada loja e o custo unitário. A linha <b>Fica</b> mostra como o estoque fica depois que o pedido chegar. O pedido é só uma simulação: fica salvo neste aparelho e não muda o estoque. Quando a mercadoria chegar, lance pela <b>Entrada</b> de cada loja.</div>
-  <input class="search" id="q" placeholder="Buscar código ou nome" value="${esc(S.q)}" aria-label="Buscar">
-  <div class="chips">${[['all','Todos'],['ped','Só o que está no pedido'],['baixo','Estoque baixo (até 3)']].map(([k,l])=>`<button class="chip" aria-pressed="${O.of===k}" data-a="of" data-v="${k}">${l}</button>`).join('')}</div>
-  <div class="grid">${L.map(vOrdCard).join('')||`<div class="empty">Nenhum produto encontrado.</div>`}</div>`;
+  <h2 style="margin-top:4px">Pedido por produto</h2>
+  <p class="sub">Em cada produto, digite quantas unidades pedir para cada loja (02, 41, 51, 85, 87) e o custo unitário. Embaixo de cada campo aparece quanto a loja tem hoje. O pedido fica salvo neste aparelho e não mexe no estoque.</p>
+  <div class="ot"><div class="orow ohead"><span>Produto</span>${STORES.map(([s])=>`<span>${s}</span>`).join('')}<span>Total</span><span>Custo unit.</span><span>Subtotal</span></div>
+  ${ordList().map(p=>vOrdRow(p,N[p[0]])).join('')}</div>`;
 }
-/* atualiza só os números do cartão e o resumo, sem redesenhar a tela (o teclado não fecha) */
+/* atualiza só os números da linha e o resumo, sem redesenhar a tela (o teclado não fecha) */
 function ordUpdate(id){
   const p=PRODUCTS.find(x=>x[0]===id);if(!p)return;const t=oTot(id),tp=pTot(p),pr=money(O.p[id]);
-  STORES.forEach(([s])=>{const v=oq(id,s),f=$('#of-'+id+'-'+s),i=$('#oq-'+id+'-'+s);if(f){f.textContent=qty(id,s)+v;f.classList.toggle('up',v>0)}if(i)i.classList.toggle('on',v>0)});
-  const ot=$('#ot-'+id);if(ot)ot.textContent=t;const oft=$('#oft-'+id);if(oft)oft.textContent=tp+t;
-  const os=$('#os-'+id);if(os)os.innerHTML=t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':'';
-  const c=$('#oc-'+id);if(c)c.classList.toggle('has',t>0);
+  STORES.forEach(([s])=>{const i=$('#oq-'+id+'-'+s);if(i)i.classList.toggle('on',oq(id,s)>0)});
+  const ot=$('#ot-'+id);if(ot){ot.textContent=t;ot.classList.toggle('up',t>0);if(ot.nextElementSibling)ot.nextElementSibling.textContent='fica '+(tp+t)}
+  const os=$('#os-'+id);if(os)os.innerHTML=t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':'—';
+  const r=$('#or-'+id);if(r)r.classList.toggle('has',t>0);
   const sm=$('#osum');if(sm)sm.innerHTML=vOrdSum();
 }
 function ordText(){
   const d=new Date(),T=ordTotals(),L=[`PEDIDO DE COMPRA · AR CONDICIONADO`,`Home Center Romanos · ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`,''];
-  PRODUCTS.filter(p=>oTot(p[0])>0).forEach(p=>{const t=oTot(p[0]),pr=money(O.p[p[0]]);
-    L.push(`${p[1]} · ${p[2]}`);
+  const N=simpleNames();
+  ordList().filter(p=>oTot(p[0])>0).forEach(p=>{const t=oTot(p[0]),pr=money(O.p[p[0]]);
+    L.push(`${N[p[0]]} (cód. ${p[1]})`);
     L.push('  '+STORES.filter(([s])=>oq(p[0],s)>0).map(([s,n])=>`${s} ${n}: ${oq(p[0],s)}`).join(' | '));
     L.push(`  Total: ${t} un${pr?` × ${brl(pr)} = ${brl(t*pr)}`:''}`);L.push('')});
   L.push('Por loja: '+STORES.filter(([s])=>T.by[s]>0).map(([s])=>`${s}: ${T.by[s]}`).join(' | '));
@@ -507,7 +532,6 @@ document.addEventListener('click',e=>{
   else if(a==='view'){S.view=t.dataset.s;render()}
   else if(a==='unlock')tryUnlock();
   else if(a==='lock'){S.mgr=false;S.mgrPw=null;render();toast('Área da gerência bloqueada')}
-  else if(a==='of'){O.of=t.dataset.v;render()}
   else if(a==='ocopy')ordCopy();
   else if(a==='oclear'){if(confirm('Limpar todas as quantidades e custos do pedido?')){O.q={};O.p={};saveOrd();render();toast('Pedido limpo')}}
   else if(a==='fa'){S.fa=t.dataset.v;render()}
