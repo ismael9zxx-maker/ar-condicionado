@@ -49,7 +49,7 @@ h2{font-size:15px;font-weight:700}
 .grid{display:grid;gap:10px;grid-template-columns:1fr}
 .pc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
 .code{font-family:var(--mono);color:var(--mut);font-size:12px}
-.pn{font-weight:600;font-size:14px;margin:2px 0 10px}
+.pn{font-weight:700;font-size:15px;margin:2px 0 1px}
 .cells{display:grid;grid-template-columns:repeat(5,1fr) 1.2fr;gap:6px}
 .sc{border:1px solid var(--bd);background:var(--hov);border-radius:10px;padding:6px 2px;text-align:center;min-height:50px}
 .sc small{display:block;font-size:11px;color:var(--mut);font-weight:600}
@@ -61,8 +61,12 @@ h2{font-size:15px;font-weight:700}
 .tag0{font-size:11.5px;color:var(--crit);font-weight:600}
 .sp2{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .big{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1;text-align:right}
-.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);margin-top:4px}
-.acts{display:flex;gap:8px;margin-top:12px}.acts .btn{flex:1}.acts .btn.e{flex:none;width:56px}
+.pill{display:inline-block;white-space:nowrap;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);margin-top:4px}
+.acts{display:flex;gap:8px;margin-top:12px}.acts .btn{flex:1}.acts .btn.e{flex:none}
+.ic{width:1.15em;height:1.15em;vertical-align:-.2em;flex:none}
+.fn{font-size:11.5px;color:var(--mut);line-height:1.3}
+.mini{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--mut)}.mini b{font-family:var(--mono);font-size:15px;color:var(--tx)}
+.sc em{display:block;font-style:normal;font-size:9.5px;color:var(--mut);line-height:1.2;overflow:hidden;white-space:nowrap}
 .banner{background:color-mix(in srgb,var(--baixo) 12%,transparent);border:1px solid var(--baixo);color:#92400e;border-radius:12px;padding:10px 12px;font-size:13px}
 .note{background:color-mix(in srgb,var(--ac) 8%,transparent);border:1px solid color-mix(in srgb,var(--ac) 35%,transparent);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--mut)}
 .lg{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd);font-size:13.5px}
@@ -100,7 +104,7 @@ footer.cr{text-align:center;font-size:12px;color:var(--mut);padding:6px 0 calc(7
 </head>
 <body>
 <header>
-  <div><h1>❄️ Ar Condicionado</h1><p class="sub">Home Center Romanos · controle por loja</p></div>
+  <div><h1><svg class="ic" style="color:var(--ac)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17M9 4l3 2 3-2M9 20l3-2 3 2"/></svg> Ar Condicionado</h1><p class="sub">Home Center Romanos · controle por loja</p></div>
   <div class="sess" id="session"></div>
 </header>
 <nav class="bar" id="nav" role="tablist"></nav>
@@ -113,6 +117,7 @@ footer.cr{text-align:center;font-size:12px;color:var(--mut);padding:6px 0 calc(7
 const API_URL='https://script.google.com/macros/s/AKfycbz71jlRPkpYCqu4ZCH417d4E92PEfZzRvvvVPZMQShpDlX21Mid6xsFfeugWmuDtSOVYg/exec';
 
 const STORES=[['02','Constroliver'],['41','Maderon'],['51','Construtiva'],['85','Madecor'],['87','Distribuidora']];
+const NAME=Object.fromEntries(STORES);
 /* senhas guardadas só como hash (SHA-256); o Apps Script confere de novo ao gravar */
 const HASH={'02':'e38f2ce6b89faa4e150948d501fbcc088e46b027929cfe9fe7a598d8d1d14b22','41':'8e96a3fdf828eb0467366cf41c94cea2fcc7293276282a306a4340cb674ab911','51':'dcd57bc1da24788001f2ef9b72e1319704fbf49287b5a4b5a0bdb4ab327790f6','85':'f899afa7fea7ede3e65915f7216b7f495755d38d69f4b889e531951f1325e022','87':'500c9f8cc78e3874dbe23100e42bdea0089f9ef4ecfaae7cfbe3ca965a5a3b8e'};
 const ENTRY_HASH='a800d3ccf1bebaf8def115b161386f61051d3eb696b7fe4a25076d7ec69f39cd';
@@ -126,7 +131,23 @@ const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
 const fmt=t=>{const d=new Date(t);return `${pad(d.getDate())} ${MES[d.getMonth()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`};
 
-const TABS=[['todas','📦','Todas as lojas'],['loja','🏬','Minha loja'],['vendas','📈','Vendas']];
+const svg=d=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC={box:svg('<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>'),
+ store:svg('<path d="M4 10v10h16V10"/><path d="M2 10l2-6h16l2 6z"/><path d="M9 20v-6h6v6"/>'),
+ chart:svg('<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>'),
+ lock:svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
+ unlock:svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>'),
+ eye:svg('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>')};
+const TABS=[['todas',IC.box,'Todas as lojas'],['loja',IC.store,'Minha loja'],['vendas',IC.chart,'Vendas']];
+/* nome curto da loja para as colunas de "Todas as lojas" */
+const ABR={'02':'Constrol.','41':'Maderon','51':'Construt.','85':'Madecor','87':'Distrib.'};
+/* título curto do produto: o que diferencia um modelo do outro (BTUs · tecnologia · linha · marca) */
+function title(n){const N=String(n).toUpperCase(),t=[];
+  const b=N.match(/(\d[\d.]*)\s*BTU/);if(b){let v=parseInt(b[1].replace(/\./g,''))||0;if(v<1000)v*=1000;t.push(String(v).replace(/\B(?=(\d{3})+$)/g,'.')+' BTUs')}
+  if(/INVERTER/.test(N))t.push('Inverter');else if(/\bOFF\b/.test(N))t.push('On/Off');
+  const l=N.match(/\b(ELITE|T-PRO|ECO)\b/);if(l)t.push(l[1]==='T-PRO'?'T-Pro':l[1][0]+l[1].slice(1).toLowerCase());
+  const m=N.match(/\b(TCL|PHILCO|ELGIN|LG|SAMSUNG|GREE|MIDEA|AGRATTO|CONSUL|ELECTROLUX|SPRINGER|DAIKIN|FUJITSU|HISENSE|BRITANIA)\b/);if(m)t.push(m[1].length<=3?m[1]:m[1][0]+m[1].slice(1).toLowerCase());
+  return t.length>=2?t.join(' · '):short(n)}
 const S={tab:'todas',store:null,pw:null,view:null,q:'',fa:'all',fs:'all',vs:'all',mgr:false,loading:true,error:null,busy:false,log:[],apiV:1,seller:'',sales:{},mgrPw:null};
 /* sessão da loja fica salva no aparelho até tocar em Sair */
 const SESS='ar-sessao',DKEY='ar-dados';
@@ -196,11 +217,11 @@ function vTodas(){
   return `<div class="hs"><div class="kp"><b>${all}</b><span>unidades nas 5 lojas</span></div>
    ${STORES.map(([s,n],i)=>`<button class="kp" data-a="gostore" data-s="${s}" style="text-align:left"><b>${tot[i]}</b><span>${s} · ${n}</span></button>`).join('')}
    <div class="kp"><b style="color:var(--${zero?'crit':'ok'})">${zero}</b><span>modelos sem estoque em todas</span></div></div>
-  <input class="search" id="q" placeholder="🔍 Buscar código ou nome" value="${esc(S.q)}" aria-label="Buscar">
+  <input class="search" id="q" placeholder="Buscar código ou nome" value="${esc(S.q)}" aria-label="Buscar">
   <div class="chips">${[['all','Todos'],['baixo','Estoque baixo (até 3)'],['sem','Sem estoque em todas']].map(([k,l])=>`<button class="chip" aria-pressed="${S.fa===k}" data-a="fa" data-v="${k}">${l}</button>`).join('')}</div>
-  <p class="sub">Toque numa loja para ver o estoque dela · 02 Constroliver · 41 Maderon · 51 Construtiva · 85 Madecor · 87 Distribuidora</p>
-  <div class="grid">${L.map(p=>{const t=tp(p);return `<div class="pc"><span class="code">${esc(p[1])}</span><div class="pn">${esc(p[2])}${t===0?`<br><span class="tag0">Sem estoque em nenhuma loja</span>`:''}</div>
-   <div class="cells">${STORES.map(([s])=>{const v=qty(p[0],s);return `<button class="sc ${lvl(v)} ${S.store===s?'mine':''}" data-a="gostore" data-s="${s}" aria-label="Loja ${s}: ${v}"><small>${s}</small><span class="q ${v===0?'z':''}">${v}</span></button>`}).join('')}<div class="tt"><small>Total</small><span class="q">${t}</span></div></div></div>`}).join('')||`<div class="empty">Nenhum produto encontrado.</div>`}</div>`;
+  <p class="sub">Toque numa loja para ver o estoque dela</p>
+  <div class="grid">${L.map(p=>{const t=tp(p);return `<div class="pc"><span class="code">${esc(p[1])}</span><div class="pn">${esc(title(p[2]))}</div><div class="fn" style="margin-bottom:10px">${esc(p[2])}${t===0?`<br><span class="tag0">Sem estoque em nenhuma loja</span>`:''}</div>
+   <div class="cells">${STORES.map(([s])=>{const v=qty(p[0],s);return `<button class="sc ${lvl(v)} ${S.store===s?'mine':''}" data-a="gostore" data-s="${s}" aria-label="Loja ${s} ${NAME[s]}: ${v}"><small>${s}</small><span class="q ${v===0?'z':''}">${v}</span><em>${ABR[s]}</em></button>`}).join('')}<div class="tt"><small>Total</small><span class="q">${t}</span></div></div></div>`}).join('')||`<div class="empty">Nenhum produto encontrado.</div>`}</div>`;
 }
 
 /* ---------- aba: loja individual ---------- */
@@ -215,14 +236,13 @@ function vLoja(){
   const lbl={z:['Sem estoque','--crit'],l:['Estoque baixo','--baixo'],o:['Em estoque','--ok']};
   const lg=S.log.filter(e=>e.store===v).slice(0,12);
   return `<div class="chips">${STORES.map(([s,n])=>`<button class="chip" aria-pressed="${v===s}" data-a="view" data-s="${s}">${s} · ${n}${S.store===s?' ✓':''}</button>`).join('')}</div>
-  ${own?`<div class="note" style="border-color:var(--ok);background:color-mix(in srgb,var(--ok) 9%,transparent)">✓ Loja ${v} liberada. Você pode dar baixa e registrar entrada.</div>`
-  :`<div class="note row sp"><span>Só consulta. Para dar baixa na loja ${v}, entre com a senha dela.</span><button class="btn pri sm" data-a="login" data-s="${v}">Entrar</button></div>`}
-  <div class="hs"><div class="kp"><b>${sumStore(v)}</b><span>unidades em estoque</span></div><div class="kp"><b style="color:var(--${sem?'crit':'ok'})">${sem}</b><span>modelos sem estoque</span></div><div class="kp"><b>${hoje}</b><span>baixas hoje</span></div></div>
-  <input class="search" id="q" placeholder="🔍 Buscar código ou nome" value="${esc(S.q)}" aria-label="Buscar">
+  ${own?'':`<div class="note row sp"><span>Só consulta. Para dar baixa na loja ${v}, entre com a senha dela.</span><button class="btn pri sm" data-a="login" data-s="${v}">Entrar</button></div>`}
+  <div class="mini"><span><b>${sumStore(v)}</b> em estoque</span><span><b style="color:var(--${sem?'crit':'ok'})">${sem}</b> ${sem===1?'modelo':'modelos'} sem estoque</span><span><b>${hoje}</b> ${hoje===1?'baixa':'baixas'} hoje</span></div>
+  <input class="search" id="q" placeholder="Buscar código ou nome" value="${esc(S.q)}" aria-label="Buscar">
   <div class="chips">${[['all','Todos'],['com','Com estoque'],['sem','Sem estoque']].map(([k,l])=>`<button class="chip" aria-pressed="${S.fs===k}" data-a="fs" data-v="${k}">${l}</button>`).join('')}</div>
   <div class="grid">${L.map(p=>{const n=qty(p[0],v),[tx,c]=lbl[lvl(n)];
-   return `<div class="pc"><div class="sp2"><div><span class="code">${esc(p[1])}</span><div class="pn" style="margin-bottom:0">${esc(p[2])}</div></div><div><div class="big" style="${n===0?'color:#9aa3b2':''}">${n}</div><div style="text-align:right"><span class="pill" style="--c:var(${c})">${tx}</span></div></div></div>
-   ${own?`<div class="acts"><button class="btn red" data-a="baixa" data-id="${p[0]}" ${n===0?'disabled':''}>− Dar baixa</button><button class="btn e" data-a="entrada" data-id="${p[0]}" aria-label="Registrar entrada (exige senha)">🔒＋</button></div>`:''}</div>`}).join('')||`<div class="empty">Nenhum produto encontrado.</div>`}</div>
+   return `<div class="pc"><div class="sp2"><div><span class="code">${esc(p[1])}</span><div class="pn">${esc(title(p[2]))}</div><div class="fn">${esc(p[2])}</div></div><div><div class="big" style="${n===0?'color:#9aa3b2':''}">${n}</div><div style="text-align:right"><span class="pill" style="--c:var(${c})">${tx}</span></div></div></div>
+   ${own?`<div class="acts"><button class="btn red" data-a="baixa" data-id="${p[0]}" ${n===0?'disabled':''}>− Dar baixa</button><button class="btn e" data-a="entrada" data-id="${p[0]}" aria-label="Registrar entrada (exige senha)">＋ Entrada</button></div>`:''}</div>`}).join('')||`<div class="empty">Nenhum produto encontrado.</div>`}</div>
   <div class="card"><h2>Últimos lançamentos · Loja ${v}</h2>${lg.length?lg.map(e=>{const p=PRODUCTS.find(x=>x[0]===e.code);return `<div class="lg" style="${e.reverted?'opacity:.5':''}"><div><b class="${e.type==='Baixa'?'down':'up'}">${e.type==='Baixa'?'−':'+'}${e.qty}</b> ${p?esc(short(p[2])):esc(e.code)}${e.reverted?' <i>(estornada)</i>':''}<small>${e.ts?fmt(e.ts):esc(e.data||'')}${e.reason&&e.reason!=='Venda'?' · <b>'+esc(e.reason)+'</b>':''}${e.seller?' · Vend.: '+esc(e.seller):''}${e.order?' · Pedido: '+esc(e.order):''}${e.note?' · '+esc(e.note):''}</small></div>${own&&!e.reverted&&!(e.type==='Entrada'&&isTransf(e))?`<button class="btn sm" data-a="revert" data-id="${esc(e.id)}">Estornar</button>`:''}</div>`}).join(''):`<div class="empty">Nenhum lançamento ainda nesta loja.</div>`}</div>`;
 }
 
@@ -252,13 +272,13 @@ function chartVendas(D){
 const pct=(a,b)=>b>0?Math.round((a-b)/b*100):null;
 const vtxt=p=>p===null?'—':`<span class="${p>=0?'up':'down'}">${p>=0?'▲':'▼'} ${Math.abs(p)}%</span>`;
 function vLock(){
-  return `<div class="card" style="max-width:420px;margin:24px auto;text-align:center"><div style="font-size:40px">🔒</div><h2 style="margin:6px 0 4px">Área da gerência</h2><p class="sub" style="margin-bottom:14px">Os dados de venda são restritos. Digite a senha para acessar.</p>
+  return `<div class="card" style="max-width:420px;margin:24px auto;text-align:center"><div style="font-size:40px;color:var(--mut)">${IC.lock}</div><h2 style="margin:6px 0 4px">Área da gerência</h2><p class="sub" style="margin-bottom:14px">Os dados de venda são restritos. Digite a senha para acessar.</p>
   <input class="search" id="gp" type="password" autocomplete="off" placeholder="Senha da gerência" aria-label="Senha da gerência"><div class="errm" id="gpe" style="text-align:left"></div>
   <button class="btn pri" id="gpb" data-a="unlock" style="width:100%;margin-top:6px">Acessar vendas</button></div>`;
 }
 function vVendas(){
   if(!S.mgr)return vLock();
-  return `<div class="row sp"><span class="sub">🔓 Área da gerência</span><button class="btn sm" data-a="lock">🔒 Bloquear</button></div>`+vVendasInner()+
+  return `<div class="row sp"><span class="sub">${IC.unlock} Área da gerência</span><button class="btn sm" data-a="lock">${IC.lock} Bloquear</button></div>`+vVendasInner()+
   `<div class="card"><div class="row sp"><h2>Modelos cadastrados · ${PRODUCTS.length}</h2>${S.apiV>=3?`<button class="btn pri sm" data-a="newprod">＋ Novo modelo</button>`:''}</div>
    <p class="sub" style="margin-top:4px">Modelo novo entra com estoque zero em todas as lojas. O estoque é lançado depois, pela entrada de cada loja.</p>
    ${PRODUCTS.map(p=>`<div class="lg"><div><span class="code">${esc(p[1])}</span><br>${esc(p[2])}</div></div>`).join('')}</div>`;
@@ -288,7 +308,7 @@ function vVendasInner(){
 /* ---------- render ---------- */
 function render(){
   $('#session').innerHTML=S.store?`<span class="who">Loja ${S.store}</span><button class="btn sm" data-a="logout">Sair</button>`:`<button class="btn pri sm" data-a="login">Entrar na loja</button>`;
-  $('#nav').innerHTML=TABS.map(([k,i,l])=>`<button role="tab" aria-selected="${S.tab===k}" data-a="tab" data-v="${k}"><span>${i}</span>${k==='loja'&&S.store?'Loja '+S.store:l+(k==='vendas'&&!S.mgr?' 🔒':'')}</button>`).join('');
+  $('#nav').innerHTML=TABS.map(([k,i,l])=>`<button role="tab" aria-selected="${S.tab===k}" data-a="tab" data-v="${k}"><span>${i}</span>${k==='loja'&&S.store?'Loja '+S.store:l}</button>`).join('');
   const app=$('#app');
   if(S.loading){app.innerHTML=`<div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>`;return}
   if(S.error&&!PRODUCTS.length){app.innerHTML=`<div class="banner">${esc(S.error)}</div><button class="btn pri" data-a="retry">Tentar de novo</button>`;return}
@@ -302,7 +322,7 @@ function render(){
 async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('ar-romanos:'+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function checkEntryPw(v){try{return (await sha(v.trim().toUpperCase()))===ENTRY_HASH}catch(e){return false}}
 function pwModal(title,onOk){
-  modal(`<h3>🔒 ${title}</h3><p class="sub">Esta ação exige a senha de entrada.</p><label for="ep2">Senha de entrada</label><input id="ep2" type="password" autocomplete="off" autocapitalize="characters"><div class="errm" id="ep2e"></div>
+  modal(`<h3>${IC.lock} ${title}</h3><p class="sub">Esta ação exige a senha de entrada.</p><label for="ep2">Senha de entrada</label><input id="ep2" type="password" autocomplete="off" autocapitalize="characters"><div class="errm" id="ep2e"></div>
   <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn pri" id="ep2ok" disabled>Confirmar</button></div>`);
   const i=$('#ep2'),b=$('#ep2ok');i.focus();
   i.addEventListener('input',()=>{b.disabled=!i.value.trim();i.classList.remove('err');$('#ep2e').textContent=''});
@@ -312,7 +332,7 @@ function pwModal(title,onOk){
 function loginModal(pre){
   modal(`<h3>Entrar na loja</h3><p class="sub">Use a senha da sua loja para dar baixa.</p>
   <label for="ls2">Loja</label><select id="ls2">${STORES.map(([s,n])=>`<option value="${s}" ${pre===s?'selected':''}>${s} · ${n}</option>`).join('')}</select>
-  <label for="pw">Senha</label><div class="pw"><input id="pw" type="password" autocomplete="off" autocapitalize="characters" placeholder="Senha da loja"><button class="btn" id="eye" type="button" aria-label="Mostrar senha">👁</button></div><div class="errm" id="pe"></div>
+  <label for="pw">Senha</label><div class="pw"><input id="pw" type="password" autocomplete="off" autocapitalize="characters" placeholder="Senha da loja"><button class="btn" id="eye" type="button" aria-label="Mostrar senha">${IC.eye}</button></div><div class="errm" id="pe"></div>
   <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn pri" id="go" disabled>Entrar</button></div>`);
   const pw=$('#pw'),gob=$('#go');pw.focus();
   pw.addEventListener('input',()=>{gob.disabled=!pw.value.trim();pw.classList.remove('err');$('#pe').textContent=''});
@@ -330,7 +350,7 @@ function moveModal(id,type){
   ${type==='Baixa'&&S.apiV>=2?`<label for="mr">Motivo da baixa</label><select id="mr"><option value="Venda">Venda</option><option value="Transferência">Transferência para outra loja</option><option value="Avaria">Avaria ou outro motivo</option></select><div id="mdw" hidden><label for="md">Loja de destino</label><select id="md">${STORES.filter(([s])=>s!==S.store).map(([s,n])=>`<option value="${s}">${s} · ${n}</option>`).join('')}</select><p class="sub" style="margin-top:6px">Sai desta loja e entra na loja de destino. Não conta como venda.</p></div>`:''}
   ${type==='Baixa'?`<label for="mv">Nome do vendedor</label><input id="mv" placeholder="Obrigatório" autocomplete="off" value="${esc(S.seller||'')}"><label for="mp">Nome ou nº do pedido</label><input id="mp" placeholder="Obrigatório na venda" autocomplete="off">`:''}
   <label for="mn">Observação (cliente, NF, motivo)</label><input id="mn" placeholder="Opcional">
-  ${type==='Entrada'?`<label for="ep">🔒 Senha de entrada</label><input id="ep" type="password" autocomplete="off" autocapitalize="characters" placeholder="Senha para dar entrada"><div class="errm" id="epe"></div>`:''}
+  ${type==='Entrada'?`<label for="ep">${IC.lock} Senha de entrada</label><input id="ep" type="password" autocomplete="off" autocapitalize="characters" placeholder="Senha para dar entrada"><div class="errm" id="epe"></div>`:''}
   <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn ${type==='Baixa'?'red':'pri'}" id="ok">Confirmar ${type==='Baixa'?'baixa':'entrada'}</button></div>`);
   const q=$('#mq'),ok=$('#ok'),mr=$('#mr');
   const okTxt=()=>type==='Entrada'?'Confirmar entrada':mr&&mr.value==='Transferência'?'Confirmar transferência':'Confirmar baixa';
