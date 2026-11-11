@@ -8,7 +8,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com"><link rel="preconnect" href="https://script.googleusercontent.com">
+<!-- fontes carregam sem segurar a primeira tela -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{--bg:#f4f6f9;--card:#fff;--bd:#dce1eb;--tx:#0e1728;--mut:#5b6678;--ac:#1d4ed8;--crit:#dc2626;--baixo:#d97706;--ok:#16a34a;--hov:rgba(14,23,40,.04);--mono:'Geist Mono',ui-monospace,monospace;--sb:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
@@ -30,7 +33,8 @@ nav.bar button{background:none;border:0;padding:8px 4px 9px;display:flex;flex-di
 nav.bar button span{font-size:20px;line-height:1}
 nav.bar button[aria-selected=true]{color:var(--ac)}
 main{max-width:1100px;margin:0 auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:12px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;animation:in .25s both}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+main.an .card,main.an .pc{animation:in .25s both}
 @keyframes in{from{opacity:0;transform:translateY(6px)}}
 h2{font-size:15px;font-weight:700}
 .row{display:flex;gap:8px;align-items:center}.sp{justify-content:space-between}
@@ -43,7 +47,7 @@ h2{font-size:15px;font-weight:700}
 .chip[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:#fff}
 .search{width:100%;border:1px solid var(--bd);border-radius:12px;padding:12px 14px;background:var(--card);font-size:16px}
 .grid{display:grid;gap:10px;grid-template-columns:1fr}
-.pc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;animation:in .25s both}
+.pc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
 .code{font-family:var(--mono);color:var(--mut);font-size:12px}
 .pn{font-weight:600;font-size:14px;margin:2px 0 10px}
 .cells{display:grid;grid-template-columns:repeat(5,1fr) 1.2fr;gap:6px}
@@ -125,7 +129,8 @@ const fmt=t=>{const d=new Date(t);return `${pad(d.getDate())} ${MES[d.getMonth()
 const TABS=[['todas','📦','Todas as lojas'],['loja','🏬','Minha loja'],['vendas','📈','Vendas']];
 const S={tab:'todas',store:null,pw:null,view:null,q:'',fa:'all',fs:'all',vs:'all',mgr:false,loading:true,error:null,busy:false,log:[],apiV:1,seller:'',sales:{},mgrPw:null};
 /* sessão da loja fica salva no aparelho até tocar em Sair */
-const SESS='ar-sessao';
+const SESS='ar-sessao',DKEY='ar-dados';
+let ANIM=true; /* anima os cartões só ao abrir ou trocar de aba */
 function saveSess(){try{if(S.store)localStorage.setItem(SESS,JSON.stringify({store:S.store,pw:S.pw,seller:S.seller||''}));else localStorage.removeItem(SESS)}catch(e){}}
 async function restoreSess(){try{const d=JSON.parse(localStorage.getItem(SESS)||'null');if(!d||!HASH[d.store]||!d.pw)return;
   if((await sha(String(d.pw).trim().toUpperCase()))!==HASH[d.store]){localStorage.removeItem(SESS);return}
@@ -143,11 +148,16 @@ function load(data){
   PRODUCTS=data.products.map(p=>[idOf(p.code),p.code,p.name,STORES.map(([s])=>Number(p.qty[s])||0)]);
   S.log=(data.log||[]).map(e=>({...e,code:idOf(e.code)}));
   S.apiV=Number(data.v)||1;S.sales={};(data.sales||[]).forEach(([k,st,c,q])=>{const key=k+'|'+st+'|'+idOf(c);S.sales[key]=(S.sales[key]||0)+(Number(q)||0)});S.loading=false;S.error=null;
+  /* guarda a última leitura no aparelho: o app abre na hora e atualiza em seguida */
+  S.sig=JSON.stringify([data.products,data.log,data.sales,data.v]);
+  try{localStorage.setItem(DKEY,JSON.stringify({products:data.products,log:data.log,sales:data.sales,v:data.v}))}catch(e){}
 }
 async function refresh(){
   if(S.busy)return;
   if(!/^https:\/\/script\.google\.com\//.test(API_URL)){S.loading=false;S.error='O link do Apps Script ainda não foi configurado.';render();return}
-  try{const r=await fetch(API_URL+'?action=data&t='+Date.now());const d=await r.json();if(!S.busy){load(d);render()}}
+  try{const r=await fetch(API_URL+'?action=data&t='+Date.now());const d=await r.json();
+    /* nada mudou na planilha: não redesenha a tela */
+    if(!S.busy&&(S.loading||S.error||JSON.stringify([d.products,d.log,d.sales,d.v])!==S.sig)){load(d);render()}}
   catch(e){S.loading=false;S.error='Não foi possível carregar o estoque. Verifique a internet.';render()}
 }
 async function post(body){
@@ -173,7 +183,7 @@ function toast(m){const t=document.createElement('div');t.className='toast';t.se
 function modal(html){$('#layer').innerHTML=`<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;$('#ov').addEventListener('mousedown',e=>{if(e.target.id==='ov')close()})}
 function close(){$('#layer').innerHTML=''}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
-function go(tab){S.tab=tab;try{location.hash=tab}catch(e){}render();scrollTo(0,0)}
+function go(tab){S.tab=tab;ANIM=true;try{location.hash=tab}catch(e){}render();scrollTo(0,0)}
 
 /* ---------- aba: todas as lojas ---------- */
 function vTodas(){
@@ -283,6 +293,7 @@ function render(){
   if(S.loading){app.innerHTML=`<div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>`;return}
   if(S.error&&!PRODUCTS.length){app.innerHTML=`<div class="banner">${esc(S.error)}</div><button class="btn pri" data-a="retry">Tentar de novo</button>`;return}
   const act=document.activeElement,keep=act&&act.id==='q'?act.selectionStart:-1;
+  app.classList.toggle('an',ANIM);ANIM=false;
   app.innerHTML=(S.error?`<div class="banner">${esc(S.error)}</div>`:'')+({todas:vTodas,loja:vLoja,vendas:vVendas}[S.tab])();
   if(keep>=0){const q=$('#q');if(q){q.focus();q.setSelectionRange(keep,keep)}}
 }
@@ -389,6 +400,7 @@ addEventListener('hashchange',()=>{const x=location.hash.slice(1);if(TABS.some(t
 /* atualiza sozinho a cada 30 s e quando o app volta para a tela, sem atrapalhar um formulário aberto */
 setInterval(()=>{if(!document.hidden&&!$('#ov'))refresh()},30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#ov'))refresh()});
+try{const c=JSON.parse(localStorage.getItem(DKEY)||'null');if(c&&c.products&&c.products.length)load(c)}catch(e){}
 render();restoreSess();refresh();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>

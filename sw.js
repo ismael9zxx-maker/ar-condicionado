@@ -1,6 +1,6 @@
 // Guarda só a casca do app (página, ícones, manifesto) para abrir rápido.
 // Os dados vêm sempre da planilha, pelo Apps Script, e nunca ficam em cache.
-var CACHE = 'ar-condicionado-v1';
+var CACHE = 'ar-condicionado-v2';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -17,10 +17,15 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
-  // Rede primeiro; o cache só entra quando estiver sem internet.
-  e.respondWith(fetch(e.request).then(function (res) {
+  // Rede primeiro, mas sem esperar mais que 2,5 s: com internet lenta abre a cópia guardada.
+  var rede = fetch(e.request).then(function (res) {
     var copy = res.clone();
     caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
     return res;
-  }).catch(function () { return caches.match(e.request); }));
+  });
+  var guardado = caches.match(e.request);
+  var espera = new Promise(function (ok) { setTimeout(ok, 2500); }).then(function () { return guardado; });
+  e.respondWith(Promise.race([rede.catch(function () { return guardado; }), espera])
+    .then(function (res) { return res || rede; }));
+  e.waitUntil(rede.catch(function () {}));
 });
