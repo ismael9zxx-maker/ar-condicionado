@@ -79,39 +79,46 @@ h2{font-size:15px;font-weight:700}
 .vr{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:13.5px}
 .vr:last-child{border-bottom:0}.vr.h{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
 .vr span:not(:first-child){text-align:right;font-family:var(--mono)}
-/* aba Compras: uma linha por produto, um campo por loja */
-.ot{background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
-.orow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.1fr);gap:6px 6px;padding:12px;border-bottom:1px solid var(--bd)}
+/* aba Compras: compacta, uma linha por produto, um campo por loja */
+.osum{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.osum .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.osum .top .val{font-family:var(--mono);font-size:18px;font-weight:700}
+.osum .top .un{font-size:13px;color:var(--mut)}.osum .top .un b{color:var(--tx);font-family:var(--mono)}
+.osum .top .bt{margin-left:auto;display:flex;gap:6px}
+.osum .warn{font-size:12px;color:var(--baixo)}
+.ost{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.ost div{background:var(--hov);border-radius:8px;padding:4px 2px;text-align:center;font-size:11px;color:var(--mut);line-height:1.25}
+.ost b{display:block;font-family:var(--mono);font-size:13px;color:var(--tx)}
+.ost .up{color:var(--ok)}.ost .all{background:var(--tx);color:#cfd6e4}.ost .all b{color:#fff}
+.ot{background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.orow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.05fr);gap:4px 5px;padding:8px 10px;border-bottom:1px solid var(--bd)}
 .orow:last-child{border-bottom:0}
 .orow.has{background:color-mix(in srgb,var(--ac) 5%,transparent)}
-.od{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-.od b{font-size:15px}.od small{font-size:12px;color:var(--mut);white-space:nowrap}
-.oi{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
-.oi label{font-size:11px;font-weight:700;color:var(--mut)}
-.oi input{width:100%;min-width:0;border:1px solid var(--bd);border-radius:9px;padding:8px 2px;text-align:center;font-family:var(--mono);font-size:17px;background:#fff;min-height:44px}
+.od{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.od b{font-size:13.5px}.od small{font-size:11px;color:var(--mut);white-space:nowrap}
+.oi{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0}
+.oi .lj{display:flex;justify-content:space-between;align-items:center;gap:2px;font-size:10.5px;font-weight:700;color:var(--mut);padding:0 2px}
+.oi .tem{font-family:var(--mono);font-size:13px;font-weight:700;border-radius:6px;padding:0 5px;line-height:18px;color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.oi .tem.l{color:#b45309;background:color-mix(in srgb,var(--baixo) 16%,transparent)}
+.oi .tem.z{color:var(--crit);background:color-mix(in srgb,var(--crit) 10%,transparent)}
+.oi input{width:100%;min-width:0;border:1px solid var(--bd);border-radius:8px;padding:4px 2px;text-align:center;font-family:var(--mono);font-size:16px;background:#fff;min-height:34px}
 .oi input:focus,.oc2 input:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 15%,transparent);outline:0}
 .oi input.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 8%,#fff);font-weight:700}
-.oi small{font-size:10.5px;color:var(--mut);white-space:nowrap}
-.oi .tot{width:100%;min-height:44px;border-radius:9px;background:var(--tx);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:700}
+.oi .tot{min-height:34px;border-radius:8px;background:var(--tx);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:700}
 .oi .tot.up{background:var(--ok)}
-.oc2{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:4px}
-.oc2 label{font-size:12px;font-weight:600;color:var(--mut)}
-.oc2 input{width:120px;border:1px solid var(--bd);border-radius:9px;padding:8px 10px;text-align:right;font-family:var(--mono);font-size:16px;background:#fff;min-height:40px}
-.oc2 .stt{margin-left:auto;text-align:right;font-family:var(--mono);font-size:12px;color:var(--mut)}
-.oc2 .stt b{display:block;font-size:15px;color:var(--tx)}
+.oi .fica{font-size:10.5px;color:var(--mut);text-align:center;white-space:nowrap}
+.oc2{grid-column:1/-1;display:flex;align-items:center;gap:8px}
+.oc2 label{font-size:11px;font-weight:600;color:var(--mut)}
+.oc2 input{width:104px;border:1px solid var(--bd);border-radius:8px;padding:4px 8px;text-align:right;font-family:var(--mono);font-size:16px;background:#fff;min-height:32px}
+.oc2 .stt{margin-left:auto;text-align:right;font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.2}
+.oc2 .stt b{display:block;font-size:13.5px;color:var(--tx)}
 .ohead{display:none}
 @media(min-width:800px){
- .ohead{display:grid;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;background:var(--hov)}
- .orow{grid-template-columns:2.4fr repeat(5,minmax(0,.8fr)) minmax(0,.8fr) 1.3fr 1.2fr;align-items:center;gap:8px}
+ .ohead{display:grid;font-size:10.5px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;background:var(--hov);padding:6px 10px}
+ .orow{grid-template-columns:2.2fr repeat(5,minmax(0,.75fr)) minmax(0,.7fr) 1.1fr 1fr;align-items:center;gap:8px;padding:6px 10px}
  .od{grid-column:auto;flex-direction:column;align-items:flex-start;gap:0}
- .oi label{display:none}.ohead span{text-align:center}.ohead span:first-child{text-align:left}
- .oc2{display:contents}.oc2 label{display:none}.oc2 input{width:100%}
- .orow.ohead .oc2{display:contents}}
-.sr{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:6px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13.5px;align-items:center}
-.sr:last-child{border-bottom:0}.sr span:not(:first-child){text-align:right;font-family:var(--mono)}
-.sr.h{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
-.sr.t{font-weight:700}
-.money{font-family:var(--mono);font-size:22px;font-weight:600}
+ .ohead span{text-align:center}.ohead span:first-child{text-align:left}
+ .oc2{display:contents}.oc2 label{display:none}.oc2 input{width:100%}}
 .overlay{position:fixed;inset:0;background:rgba(10,15,30,.5);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:50}
 .modal{background:var(--card);border-radius:20px 20px 0 0;width:min(480px,100%);padding:20px 18px calc(18px + var(--sb));max-height:92vh;overflow:auto;animation:up .22s ease}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
@@ -336,15 +343,10 @@ function ordTotals(){let u=0,v=0;const by={};STORES.forEach(([s])=>by[s]=0);
 function vOrdSum(){
   const T=ordTotals(),now=STORES.map(([s])=>sumStore(s)),all=now.reduce((a,b)=>a+b,0);
   const noPrice=PRODUCTS.filter(p=>oTot(p[0])>0&&!money(O.p[p[0]])).length;
-  return `<div class="hs"><div class="kp"><b>${all}</b><span>estoque total hoje</span></div>
-   <div class="kp"><b style="color:var(--ac)">${T.u}</b><span>unidades no pedido</span></div>
-   <div class="kp"><b>${all+T.u}</b><span>estoque depois do pedido</span></div></div>
-  <div class="card"><div class="row sp"><h2>Valor do pedido</h2><span class="money">${brl(T.v)}</span></div>
-   ${noPrice?`<p class="sub" style="color:var(--baixo);margin-top:4px">${noPrice} ${noPrice===1?'modelo está':'modelos estão'} no pedido sem custo unitário.</p>`:''}
-   <div class="sr h" style="margin-top:8px"><span>Loja</span><span>Hoje</span><span>Pedido</span><span>Fica</span></div>
-   ${STORES.map(([s,n],i)=>`<div class="sr"><span>${s} · ${n}</span><span>${now[i]}</span><span${T.by[s]?' class="up"':''}>${T.by[s]?'+'+T.by[s]:'—'}</span><span>${now[i]+T.by[s]}</span></div>`).join('')}
-   <div class="sr t"><span>Total</span><span>${all}</span><span${T.u?' class="up"':''}>${T.u?'+'+T.u:'—'}</span><span>${all+T.u}</span></div>
-   <div class="acts"><button class="btn pri" data-a="ocopy" ${T.u?'':'disabled'}>Copiar pedido</button><button class="btn" data-a="oclear" ${T.u||Object.keys(O.p).length?'':'disabled'}>Limpar</button></div></div>`;
+  return `<div class="osum"><div class="top"><span class="val">${brl(T.v)}</span><span class="un"><b>${T.u}</b> un no pedido</span>
+   <span class="bt"><button class="btn pri sm" data-a="ocopy" ${T.u?'':'disabled'}>Copiar pedido</button><button class="btn sm" data-a="oclear" ${T.u||Object.keys(O.p).length?'':'disabled'}>Limpar</button></span></div>
+   ${noPrice?`<span class="warn">${noPrice} ${noPrice===1?'produto está':'produtos estão'} no pedido sem custo unitário.</span>`:''}
+   <div class="ost">${STORES.map(([s],i)=>`<div>${s}<b>${now[i]}${T.by[s]?` <span class="up">→ ${now[i]+T.by[s]}</span>`:''}</b></div>`).join('')}<div class="all">Total<b>${all}${T.u?` → ${all+T.u}`:''}</b></div></div></div>`;
 }
 /* descrição simples: "Ar condicionado 9.000 Inverter". Linha/marca só entram se dois modelos ficarem iguais */
 function btuOf(n){const N=String(n).toUpperCase(),b=N.match(/(\d[\d.]*)\s*BTU/);if(b){let v=parseInt(b[1].replace(/\./g,''))||0;if(v<1000)v*=1000;return v}
@@ -364,28 +366,27 @@ const ordList=()=>[...PRODUCTS].sort((a,b)=>btuOf(a[2])-btuOf(b[2])||tecOf(a[2])
 function vOrdRow(p,nm){
   const id=p[0],t=oTot(id),pr=money(O.p[id]),tp=pTot(p);
   return `<div class="orow ${t?'has':''}" id="or-${id}">
-   <div class="od"><b>${esc(nm)}</b><small>cód. ${esc(p[1])} · estoque ${tp}</small></div>
-   ${STORES.map(([s])=>{const v=oq(id,s);return `<div class="oi"><label for="oq-${id}-${s}">${s}</label><input id="oq-${id}-${s}" class="${v?'on':''}" data-o="q" data-id="${id}" data-s="${s}" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${v||''}" placeholder="0" aria-label="${esc(nm)}: pedir para a loja ${s} ${NAME[s]}"><small>tem ${qty(id,s)}</small></div>`}).join('')}
-   <div class="oi"><label>Total</label><span class="tot ${t?'up':''}" id="ot-${id}">${t}</span><small>fica ${tp+t}</small></div>
+   <div class="od"><b>${esc(nm)}</b><small>cód. ${esc(p[1])}</small></div>
+   ${STORES.map(([s])=>{const v=oq(id,s),h=qty(id,s);return `<div class="oi"><span class="lj">${s}<span class="tem ${lvl(h)}" title="Estoque atual da loja ${s}">${h}</span></span><input id="oq-${id}-${s}" class="${v?'on':''}" data-o="q" data-id="${id}" data-s="${s}" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${v||''}" placeholder="+" aria-label="${esc(nm)}: loja ${s} tem ${h}, quantos pedir"></div>`}).join('')}
+   <div class="oi"><span class="lj">Total<span class="tem ${lvl(tp)}">${tp}</span></span><span class="tot ${t?'up':''}" id="ot-${id}">${t}</span></div>
    <div class="oc2"><label for="op-${id}">Custo unit.</label><input id="op-${id}" data-o="p" data-id="${id}" type="text" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00" value="${esc(O.p[id]||'')}" aria-label="${esc(nm)}: custo unitário">
-    <div class="stt" id="os-${id}">${t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':'—'}</div></div></div>`;
+    <div class="stt" id="os-${id}">${t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':''}</div></div></div>`;
 }
 function vCompras(){
   if(!S.mgr)return vLock();
   const N=simpleNames();
-  return `<div class="row sp"><span class="sub">${IC.unlock} Área da gerência · montar pedido</span><button class="btn sm" data-a="lock">${IC.lock} Bloquear</button></div>
+  return `<div class="row sp"><span class="sub">${IC.unlock} Gerência · montar pedido</span><button class="btn sm" data-a="lock">${IC.lock} Bloquear</button></div>
   <div id="osum">${vOrdSum()}</div>
-  <h2 style="margin-top:4px">Pedido por produto</h2>
-  <p class="sub">Em cada produto, digite quantas unidades pedir para cada loja (02, 41, 51, 85, 87) e o custo unitário. Embaixo de cada campo aparece quanto a loja tem hoje. O pedido fica salvo neste aparelho e não mexe no estoque.</p>
+  <p class="sub">O número colorido é o estoque que a loja já tem. Digite embaixo quanto pedir. Fica salvo neste aparelho e não mexe no estoque.</p>
   <div class="ot"><div class="orow ohead"><span>Produto</span>${STORES.map(([s])=>`<span>${s}</span>`).join('')}<span>Total</span><span>Custo unit.</span><span>Subtotal</span></div>
   ${ordList().map(p=>vOrdRow(p,N[p[0]])).join('')}</div>`;
 }
 /* atualiza só os números da linha e o resumo, sem redesenhar a tela (o teclado não fecha) */
 function ordUpdate(id){
-  const p=PRODUCTS.find(x=>x[0]===id);if(!p)return;const t=oTot(id),tp=pTot(p),pr=money(O.p[id]);
+  const p=PRODUCTS.find(x=>x[0]===id);if(!p)return;const t=oTot(id),pr=money(O.p[id]);
   STORES.forEach(([s])=>{const i=$('#oq-'+id+'-'+s);if(i)i.classList.toggle('on',oq(id,s)>0)});
-  const ot=$('#ot-'+id);if(ot){ot.textContent=t;ot.classList.toggle('up',t>0);if(ot.nextElementSibling)ot.nextElementSibling.textContent='fica '+(tp+t)}
-  const os=$('#os-'+id);if(os)os.innerHTML=t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':'—';
+  const ot=$('#ot-'+id);if(ot){ot.textContent=t;ot.classList.toggle('up',t>0)}
+  const os=$('#os-'+id);if(os)os.innerHTML=t&&pr?`${t} × ${brl(pr)}<b>${brl(t*pr)}</b>`:t?'sem custo':'';
   const r=$('#or-'+id);if(r)r.classList.toggle('has',t>0);
   const sm=$('#osum');if(sm)sm.innerHTML=vOrdSum();
 }
